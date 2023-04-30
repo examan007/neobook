@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Created by CodingLab |www.youtube.com/CodingLabYT-->
 <html lang="en" dir="ltr">
 
 <head>
@@ -14,6 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <script src="../neonow/js/app.js"></script>
+    <link href="css/book.css" rel="stylesheet">
 
     <style>
       body {
@@ -29,28 +29,25 @@
         padding: 0;
         margin: 0;
       }
-      #calendar {
-        overflow: hidden !important;
+      #login {
+        display: none;
         position: absolute;
-        top: 50%;
-        left: 20%;
-        transform: translate(-0%, -50%);
-        height: 40em;
-        width: 75%;
-        background-color: rgba(255, 255, 255, .8);
-        display: block;
-        box-sizing: border-box;
-        z-index: 250;
-        border-radius: 50px;
+        top: 0;
+        z-index: 300;
+        height: 100%;
+        width: 100%;
+        margin: auto;
+        background-color: rgba(255, 255, 255, 0.25);
       }
     </style>
 </head>
 <body>
     <section id="Booking" class="brochure" style="display:block">
         <object id="calendar" type="text/html" data="file:///C:/Users/14165/Documents/home/neobook/index.html"></object>
+        <object id="login"  type="text/html" data="file:///C:/Users/14165/Documents/home/neonow/login-new.html"></object>
     </section>
     <script>
-        neobookOnLoad()
+        neoOnload()
     </script>
 
 </body>

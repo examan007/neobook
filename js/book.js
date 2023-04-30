@@ -24,6 +24,18 @@ var BookingManager = function() {
             return server
         }
     }
+    function getTodayDate(daystoadd) {
+        const today = new Date();
+        today.setDate(today.getDate() + daystoadd);
+        const date = today.getDate();
+        const month = today.getMonth() + 1; // months are zero-indexed, so add 1
+        const year = today.getFullYear();
+
+        const todayString = `${year}-${month}-${date}`;
+        console.log(todayString); // outputs something like "4/27/2023"
+        return todayString
+    }
+    var LastClickEvent
     const searchParams = new URLSearchParams(getParameters());
     const date = searchParams.get("date")
     console.log("BookingManager() params=[" + date + "]")
@@ -32,9 +44,22 @@ var BookingManager = function() {
               const calendarEl = document.getElementById('calendar')
               const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
+                visibleRange: function(currentDate) {
+                    // Generate a new date for manipulating in the next step
+                    var startDate = new Date(currentDate.valueOf());
+                    var endDate = new Date(currentDate.valueOf());
+
+                    // Adjust the start & end dates, respectively
+                    //startDate.setDate(startDate.getDate() - 1); // One day in the past
+                    endDate.setDate(endDate.getDate() + 90); // Two days into the future
+                    console.log("In visibleRange function.")
+                    return { start: startDate, end: endDate };
+                  },
                 contentHeight: 'auto',
                 dateClick: function(info) {
                   console.log('Clicked on: ' + info.dateStr);
+                  console.log('Coordinates: ' + JSON.stringify(info.jsEvent) ) //.pageX + ',' + info.jsEvent.pageY);
+
                     function sendURLTOParent (params) {
                         // Get a reference to the parent window
                         var parentWindow = window.parent;
@@ -42,7 +67,7 @@ var BookingManager = function() {
                         // Create a message object
                         var message = {
                             operation: "seturistate",
-                            newhref: params
+                            newhref: params,
                         }
 
                         // Send the message to the parent window
@@ -67,6 +92,22 @@ var BookingManager = function() {
                       //window.location.href = url
                       //history.pushState(state, title, url);
                       sendURLTOParent(params)
+                  } else {
+                      console.log("Pop up appointment request.")
+                      try {
+                          var message = {
+                              operation: 'showappointmentrequest',
+                              datetime: info.dateStr,
+                              xpos: LastClickEvent.clientX,
+                              ypos: LastClickEvent.clientY
+                          }
+//                                                        xpos: info.jsEvent.pageX,
+//                                                        ypos: info.jsEvent.pageY
+
+                          window.parent.postMessage(JSON.stringify(message), "*");
+                      } catch (e) {
+                        console.log(e.toString())
+                      }
                   }
                 },
                   headerToolbar: {
@@ -86,11 +127,18 @@ var BookingManager = function() {
               if (date != null) {
                   console.log("select date = [" + date + "]")
                   calendar.changeView('timeGridDay', date);
+              } else {
               }
               calendar.render()
             })
         }
         startCalendar()
+        document.getElementById("calendar").addEventListener("click", function(event) {
+            const x = event.clientX;
+            const y = event.clientY;
+            console.log(`Clicked at position (${x}, ${y})`);
+            LastClickEvent = event;
+        })
 
     return {
         show: function() {
@@ -98,3 +146,4 @@ var BookingManager = function() {
         }
     }
 }
+
