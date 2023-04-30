@@ -35,7 +35,32 @@ var BookingManager = function() {
         console.log(todayString); // outputs something like "4/27/2023"
         return todayString
     }
-    var LastClickEvent
+    var CompletionMethodObj = function (event) {
+        var LastClickEvent = null
+        var CompletionSet = false
+        var CompletionMethod = function (event) {}
+        function testExecOrWait() {
+            if (LastClickEvent != null ) {
+                if (CompletionSet == true) {
+                    CompletionMethod(LastClickEvent)
+                    LastClickEvent = null
+                    CompletionSet = false
+                }
+            }
+        }
+        return {
+            getLastClickEvent: function (completion) {
+                CompletionSet = true
+                CompletionMethod = completion
+                testExecOrWait()
+            },
+            setLastClickEvent: function (event) {
+                LastClickEvent = event
+                testExecOrWait()
+            }
+       }
+    }
+    const Completion = CompletionMethodObj()
     const searchParams = new URLSearchParams(getParameters());
     const date = searchParams.get("date")
     console.log("BookingManager() params=[" + date + "]")
@@ -94,20 +119,19 @@ var BookingManager = function() {
                       sendURLTOParent(params)
                   } else {
                       console.log("Pop up appointment request.")
-                      try {
-                          var message = {
-                              operation: 'showappointmentrequest',
-                              datetime: info.dateStr,
-                              xpos: LastClickEvent.clientX,
-                              ypos: LastClickEvent.clientY
+                      Completion.getLastClickEvent( function (event) {
+                          try {
+                              var message = {
+                                  operation: 'showappointmentrequest',
+                                  datetime: info.dateStr,
+                                  xpos: event.clientX,
+                                  ypos: event.clientY,
+                              }
+                              window.parent.postMessage(JSON.stringify(message), "*");
+                          } catch (e) {
+                            console.log(e.toString())
                           }
-//                                                        xpos: info.jsEvent.pageX,
-//                                                        ypos: info.jsEvent.pageY
-
-                          window.parent.postMessage(JSON.stringify(message), "*");
-                      } catch (e) {
-                        console.log(e.toString())
-                      }
+                      })
                   }
                 },
                   headerToolbar: {
@@ -137,7 +161,7 @@ var BookingManager = function() {
             const x = event.clientX;
             const y = event.clientY;
             console.log(`Clicked at position (${x}, ${y})`);
-            LastClickEvent = event;
+            Completion.setLastClickEvent(event)
         })
 
     return {
