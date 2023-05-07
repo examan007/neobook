@@ -60,6 +60,17 @@ var BookingManager = function() {
             }
        }
     }
+    function closeSidebar() {
+        const message = {
+            operation: 'closesidebar',
+        }
+        try {
+            window.parent.postMessage(JSON.stringify(message), "*");
+            console.log("message posted [" + JSON.stringify(message) + "]")
+        } catch (e) {
+            console.log(e.toString())
+        }
+    }
     const Completion = CompletionMethodObj()
     const searchParams = new URLSearchParams(getParameters());
     const date = searchParams.get("date")
@@ -162,6 +173,9 @@ var BookingManager = function() {
             const y = event.clientY;
             console.log(`Clicked at position (${x}, ${y})`);
             Completion.setLastClickEvent(event)
+        })
+        $('#calendar').on('click', function () {
+            closeSidebar()
         })
 
     return {
