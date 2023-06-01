@@ -1,14 +1,26 @@
-      #calendar {
-        overflow: hidden !important;
-        position: absolute;
-        top: 50%;
-        left: 20%;
-        transform: translate(-0%, -50%);
-        height: 75%;
-        width: 75%;
-        background-color: rgba(255, 255, 255, .8);
-        display: block;
-        box-sizing: border-box;
-        z-index: 250;
-        border-radius: 50px;
-      }
+#calendar {
+    overflow: hidden !important;
+    position: absolute;
+    top: 50%;
+    left: 20%;
+    transform: translate(-0%, -50%);
+    height: 75%;
+    width: 75%;
+    background-color: rgba(255, 255, 255, .8);
+    display: block;
+    box-sizing: border-box;
+    z-index: 250;
+    border-radius: 50px;
+}
+.appointment {
+    font-size: 1.5em;
+}
+.confirmed {
+    background-color: green;
+}
+.fc-header-toolbar {
+    font-size: 1em;
+}
+.fc-button-group {
+    left: -50px;
+}
