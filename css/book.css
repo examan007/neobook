@@ -16,11 +16,14 @@
     font-size: 1.5em;
 }
 .confirmed {
-    background-color: green;
+    background-color: #ddfcac;
 }
 .fc-header-toolbar {
     font-size: 1em;
 }
 .fc-button-group {
     left: 0px;
+}
+.fc-event-title {
+    color: #000000;
 }

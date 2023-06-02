@@ -77,13 +77,199 @@ var BookingManager = function() {
 
     const Completion = CompletionMethodObj()
     const searchParams = new URLSearchParams(getParameters());
-    const date = searchParams.get("date")
     var Calendar = null
-    console.log("BookingManager() params=[" + date + "]")
+    function sendToParent(message) {
+        try {
+            window.parent.postMessage(JSON.stringify(message), "*");
+            console.log("message posted [" + JSON.stringify(message) + "]")
+        } catch (e) {
+            console.log("sendURLTOParent: " + e.toString())
+        }
+    }
+    function exitlogin() {
+      var message = {
+        operation: "exitlogin"
+      };
+      sendToParent(message)
+    }
+    function sendURLTOParent (params) {
+        var message = {
+            operation: "seturistate",
+            newhref: params,
+        }
+        sendToParent(message)
+    }
+    function getMonth(indatestr) {
+        try {
+            function getValidDateStr(datestr) {
+                function getNextValue() {
+                    if (datestr === CurrentDate) {
+                        return Calendar.getDate()
+                    } else {
+                        return getValidDateStr(CurrentDate)
+                    }
+                }
+                if (typeof(datestr) === "undefined") {
+                    return getNextValue(CurrentDate)
+                } else
+                if (datestr == null) {
+                    return getNextValue(CurrentDate)
+                } else {
+                    return datestr
+                }
+            }
+            const datestr = getValidDateStr(indatestr)
+            const newmoment = moment(datestr, "YYYY-MM-DD");
+            const newdatestr = newmoment.format("YYYY-MM");
+            console.log("New string: [" + newdatestr + "] CurrentDate: [" + CurrentDate + "]")
+            return newdatestr
+        } catch (e) {
+            console.log(e.toString())
+        }
+        return indatestr
+    }
+    function getNewParameters(datestr) {
+        const paramsobj = new URLSearchParams(getParameters());
+        function getAttrName() {
+            if (CurrentView === 'timeGridDay') {
+                return 'date'
+            } else {
+                return 'date'
+            }
+        }
+        function getNewDate() {
+            if (CurrentView === 'timeGridDay') {
+                return datestr
+            } else {
+                return getMonth(datestr)
+            }
+        }
+        const attrname = getAttrName()
+        const newdate = getNewDate()
+        paramsobj.delete(attrname)
+        paramsobj.append(attrname, newdate)
+        const params = paramsobj.toString()
+        if (typeof(params) === 'undefined') {
+            return "?" + attrname + "=" + newdate
+        } else
+        if (params.length > 0) {
+            return "?" + params
+        } else {
+            return "?" + attrname + "=" + newdate
+        }
+    }
+    function pushState(newdate) {
+        if (typeof(newdate) === 'undefined') {
+        } else
+        if (newdate === null ) {
+        } else {
+            const params = getNewParameters(newdate)
+            sendURLTOParent(params)
+        }
+    }
+    function popupRequest(message) {
+        console.log("Pop up appointment request.")
+        closeSidebar()
+        Completion.getLastClickEvent( function (event) {
+            console.log(message.operation)
+          try {
+              message.xpos = event.clientX
+              message.ypos = event.clientY
+              window.parent.postMessage(JSON.stringify(message), "*");
+          } catch (e) {
+            console.log(e.toString())
+          }
+        })
+    }
+    var CurrentDate = null
+    var CurrentView = null
+    function setCurrentDate(dateStr) {
+        console.log("select date = [" + dateStr + "]")
+        if (CurrentDate !== dateStr)
+        try {
+            function getInitialState () {
+                if (dateStr.length < 8) {
+                    return {
+                        currentview: 'dayGridMonth',
+                        formatstring: 'YYYY-MM'
+                    }
+                } else {
+                    return {
+                        currentview: 'timeGridDay',
+                        formatstring: 'YYYY-MM-DD'
+                    }
+                }
+            }
+            const state = getInitialState()
+            var parsedDate = moment(dateStr, state.formatstring);
+            Calendar.changeView(state.currentview, dateStr);
+            CurrentView = state.currentview
+            CurrentDate = dateStr
+            console.log("CurrentDate=[" + CurrentDate + "]")
+        } catch (e) {
+            console.log("setCurrenDate: " + e.toString())
+        }
+    }
+    function addToDate(datestr, days) {
+        try {
+            var parsedDate = moment(datestr, "YYYY-MM-DD");
+            var newMoment = parsedDate.add(days, 'days');
+            return newMoment.format("YYYY-MM-DD");
+        } catch (e) {
+            console.log(e.toString())
+        }
+        return datestr
+    }
+    function addToMonth(datestr, months) {
+        try {
+            var parsedDate = moment(datestr, "YYYY-MM");
+            var newMoment = parsedDate.add(months, 'months');
+            return newMoment.format("YYYY-MM");
+        } catch (e) {
+            console.log(e.toString())
+        }
+        return datestr
+    }
+            function filterDate() {
+                try {
+                    const datestr = searchParams.get("date").replace(/"/g, '');
+                    return datestr
+                } catch (e) {
+                    console.log("getting date from query: ", e.toString())
+                }
+                return null
+            }
+             const date = filterDate()
+        console.log("BookingManager() params=[" + date + "]")
+
         function startCalendar() {
             document.addEventListener('DOMContentLoaded', function() {
               const calendarEl = document.getElementById('calendar')
-              Calendar = new FullCalendar.Calendar(calendarEl, {
+                function switchDay(offset) {
+                    if (CurrentView === 'timeGridDay') {
+                        setCurrentDate(addToDate(CurrentDate, offset))
+                        pushState(CurrentDate)
+                    } else
+                    if (offset === 1) {
+                        setCurrentDate(addToMonth(CurrentDate, offset))
+                        pushState(CurrentDate)
+                    } else {
+                        setCurrentDate(addToMonth(CurrentDate, offset))
+                        pushState(CurrentDate)
+                    }
+                    console.log('Next/Prev button clicked; new date is [' + CurrentDate + "]");
+                }
+                Calendar = new FullCalendar.Calendar(calendarEl, {
+                customButtons: {
+                  prev: {
+                    text: 'Prev',
+                    click: function(info) { switchDay(-1) }
+                  },
+                  next: {
+                    text: 'Next',
+                    click: function(info) { switchDay(1) }
+                  }
+                },
                 initialView: 'dayGridMonth',
                 visibleRange: function(currentDate) {
                     // Generate a new date for manipulating in the next step
@@ -104,58 +290,34 @@ var BookingManager = function() {
                     }
                     return []
                 },
-                dateClick: function(info) {
+                 eventClick: function(info) {
+                   console.log('Event clicked:', JSON.stringify(info));
+                   if (info.view.type === 'timeGridDay') {
+                      popupRequest({
+                          operation: 'changeappointmentrequest',
+                          datetime: info.event.start,
+                          usermessage: info.event.title,
+                          event: info.event,
+                      })
+                   } else {
+                        const newdate = JSON.stringify(info.event.start).split('T')[0]
+                        console.log("newdate=[" + newdate + "]")
+                        setCurrentDate(newdate)
+                        pushState(newdate)
+                   }
+                 },
+                 dateClick: function(info) {
                   console.log('Clicked on: ' + info.dateStr);
                   console.log('Coordinates: ' + JSON.stringify(info.jsEvent) ) //.pageX + ',' + info.jsEvent.pageY);
-
-                    function sendURLTOParent (params) {
-                        // Get a reference to the parent window
-                        var parentWindow = window.parent;
-
-                        // Create a message object
-                        var message = {
-                            operation: "seturistate",
-                            newhref: params,
-                        }
-
-                        // Send the message to the parent window
-                        parentWindow.postMessage(JSON.stringify(message), "*");
-                        console.log("message posted [" + JSON.stringify(message) + "]")
-                    }
-                    function getNewParameters() {
-                        const params = window.location.href.split("?")[1]
-                        if (typeof(params) === 'undefined') {
-                            return "?date=" + info.dateStr
-                        } else {
-                            return "?date=" + info.dateStr + "&" + params
-                        }
-                    }
                   const timeselect = info.dateStr.split("T")[1]
-                  if (typeof(timeselect) === "undefined") {
-                      Calendar.changeView('timeGridDay', info.dateStr);
-                      const state = { user: 12 };
-                      const title = 'My new page';
-                      const params = getNewParameters()
-                      console.log("new state url=[" + params + "] href=[" + window.location.href + "]")
-                      //window.location.href = url
-                      //history.pushState(state, title, url);
-                      sendURLTOParent(params)
-                  } else {
-                      console.log("Pop up appointment request.")
-                      closeSidebar()
-                      Completion.getLastClickEvent( function (event) {
-                            console.log("showappointmentrequest")
-                          try {
-                              var message = {
-                                  operation: 'showappointmentrequest',
-                                  datetime: info.dateStr,
-                                  xpos: event.clientX,
-                                  ypos: event.clientY,
-                              }
-                              window.parent.postMessage(JSON.stringify(message), "*");
-                          } catch (e) {
-                            console.log(e.toString())
-                          }
+                 if (info.view.type !== 'timeGridDay') {
+                      setCurrentDate(info.dateStr)
+                      pushState(info.dateStr)
+                 } else {
+                      popupRequest({
+                          operation: 'showappointmentrequest',
+                          datetime: info.dateStr,
+                          usermessage: "",
                       })
                   }
                 },
@@ -174,10 +336,13 @@ var BookingManager = function() {
                     }
                 },
                })
-              if (date != null) {
-                  console.log("select date = [" + date + "]")
-                  Calendar.changeView('timeGridDay', date);
+
+             if (date != null) {
+                  setCurrentDate(date)
+                  //pushState(CurrentDate)
               } else {
+                  console.log("Default current month.")
+                  setCurrentDate(getMonth(Calendar.getDate()))
               }
               Calendar.render()
             })
@@ -219,7 +384,9 @@ var BookingManager = function() {
           //}
           //console.log(JSON.stringify(event))
           //Calendar.addEvent(event);
-
+          Calendar.getEvents().forEach(function(event) {
+              event.remove();
+            });
           Calendar.batchRendering(() => {
             data.events.forEach((newevent) => {
               console.log(JSON.stringify(newevent))
