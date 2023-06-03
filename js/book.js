@@ -183,7 +183,8 @@ var BookingManager = function() {
     }
     var CurrentDate = null
     var CurrentView = null
-    function setCurrentDate(dateStr) {
+    function setCurrentDate(indateStr) {
+        const dateStr = indateStr.replace(/^[^\d]+/, "");
         console.log("select date = [" + dateStr + "]")
         if (CurrentDate !== dateStr)
         try {
