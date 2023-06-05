@@ -272,6 +272,7 @@ var BookingManager = function() {
                   }
                 },
                 initialView: 'dayGridMonth',
+                themeSystem: 'material',
                 visibleRange: function(currentDate) {
                     // Generate a new date for manipulating in the next step
                     var startDate = new Date(currentDate.valueOf());

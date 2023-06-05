@@ -26,4 +26,10 @@
 }
 .fc-event-title {
     color: #000000;
+    line-height: 0.9;
+}
+.fc-prev-button, .fc-next-button {
+    color: #000000 !important;
+    background-color: #FFFFFF !important;
+    border: 0 !important;
 }
