@@ -231,16 +231,26 @@ var BookingManager = function() {
         }
         return datestr
     }
-            function filterDate() {
-                try {
-                    const datestr = searchParams.get("date").replace(/"/g, '');
-                    return datestr
-                } catch (e) {
-                    console.log("getting date from query: ", e.toString())
-                }
-                return null
-            }
-             const date = filterDate()
+    function convertDate(datestr, duration) {
+        try {
+            var parsedDate = moment(datestr, "dddd, MMMM D, YYYY [at] h:mm A [EDT]");
+            var newMoment = parsedDate.add(duration, 'minutes');
+            return newMoment.format("YYYY-MM-DDTHH:mm:ss");
+        } catch (e) {
+            console.log(e.toString())
+            return ""
+        }
+    }
+    function filterDate() {
+        try {
+            const datestr = searchParams.get("date").replace(/"/g, '');
+            return datestr
+        } catch (e) {
+            console.log("getting date from query: ", e.toString())
+        }
+        return null
+    }
+        const date = filterDate()
         console.log("BookingManager() params=[" + date + "]")
 
         function startCalendar() {
@@ -302,10 +312,12 @@ var BookingManager = function() {
                           event: info.event,
                       })
                    } else {
-                        const newdate = JSON.stringify(info.event.start).split('T')[0]
+                        const newdate = convertDate(info.event.start)
+                        console.log("newdate=[" + info.event.start + "]")
                         console.log("newdate=[" + newdate + "]")
-                        setCurrentDate(newdate)
-                        pushState(newdate)
+                        const dateonly = newdate.split('T')[0]
+                        setCurrentDate(dateonly)
+                        pushState(dateonly)
                    }
                  },
                  dateClick: function(info) {
@@ -356,18 +368,6 @@ var BookingManager = function() {
             console.log(`Clicked at position (${x}, ${y})`);
             Completion.setLastClickEvent(event)
         })
-
-        function convertDate(datestr, duration) {
-            try {
-                var parsedDate = moment(datestr, "dddd, MMMM D, YYYY [at] h:mm A [EDT]");
-                var newMoment = parsedDate.add(duration, 'minutes');
-                return newMoment.format("YYYY-MM-DDTHH:mm:ss");
-            } catch (e) {
-                console.log(e.toString())
-                return ""
-            }
-        }
-
         function createEvent(data) {
           function getTitle() {
             try {
