@@ -365,8 +365,9 @@ var BookingManager = function() {
         document.getElementById("calendar").addEventListener("click", function(event) {
             const x = event.clientX;
             const y = event.clientY;
-            console.log(`Clicked at position (${x}, ${y})`);
+            console.log("Clicked at position (${x}, ${y})")
             Completion.setLastClickEvent(event)
+            closeSidebar()
         })
         function createEvent(data) {
           function getTitle() {
