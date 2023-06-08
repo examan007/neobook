@@ -493,9 +493,9 @@ var BookingManager = function() {
                         cloned.classList.add('slide-out-right-show');
                         cloned.classList.remove('slide-in')
                         Calendar.render()
-                    }, 750)
-                }, 750)
-              }, 750)
+                    }, 500)
+                }, 500)
+              }, 500)
           } else if (swipeDistance < -50) {
             //$('#calendar').css("background-color", "yellow")
             $('#denolc').css("visibility", "visible")
@@ -524,9 +524,9 @@ var BookingManager = function() {
                         denolc.classList.add('slide-out');
                         denolc.classList.remove('slide-in');
                         Calendar.render()
-                    }, 750)
-                }, 750)
-              }, 750)
+                    }, 500)
+                }, 500)
+              }, 500)
           }
 
           startX = 0;
