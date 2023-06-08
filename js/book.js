@@ -468,7 +468,7 @@ var BookingManager = function() {
           if (swipeDistance > 50) {
             //$('#calendar').css("background-color", "blue")
             $('#cloned').css("visibility", "visible")
-            $('#calendar').css("display", "block")
+            $('#calendar').css("visibility", "visible")
             content.classList.remove('slide-in');
             content.classList.add('slide-out');
             cloned.classList.add('slide-in')
@@ -479,25 +479,27 @@ var BookingManager = function() {
                 CalendarCloned.render()
               window.setTimeout(()=> {
                 //$('#calendar').css("background-color", "red")
-                $('#calendar').css("display", "none")
+                $('#calendar').css("visibility", "hidden")
                 //Calendar.next()
                 content.classList.remove('slide-out');
                 content.classList.add('slide-out-right');
                 window.setTimeout(()=> {
-                     $('#cloned').css("visibility", "hidden")
                    //$('#calendar').css("background-color", "green")
-                    $('#calendar').css("display", "block")
                     content.classList.remove('slide-out-right');
                     content.classList.add('slide-in');
-                    cloned.classList.add('slide-out-right-show');
-                    cloned.classList.remove('slide-in')
-                    Calendar.render()
-                }, 1)
+                    window.setTimeout(()=> {
+                        $('#cloned').css("visibility", "hidden")
+                        $('#calendar').css("visibility", "visible")
+                        cloned.classList.add('slide-out-right-show');
+                        cloned.classList.remove('slide-in')
+                        Calendar.render()
+                    }, 750)
+                }, 750)
               }, 750)
           } else if (swipeDistance < -50) {
             //$('#calendar').css("background-color", "yellow")
             $('#denolc').css("visibility", "visible")
-            $('#calendar').css("display", "block")
+            $('#calendar').css("visibility", "visible")
             content.classList.remove('slide-in');
             content.classList.add('slide-out-right-show');
             denolc.classList.add('slide-in')
@@ -508,20 +510,22 @@ var BookingManager = function() {
                 CalendarDenolc.render()
               window.setTimeout(()=> {
                 //$('#calendar').css("background-color", "black")
-                $('#calendar').css("display", "none")
+                $('#calendar').css("visibility", "hidden")
                 //Calendar.prev()
                 content.classList.remove('slide-out-right-show');
                 content.classList.add('slide-in-right');
                 window.setTimeout(()=> {
-                     $('#denolc').css("visibility", "hidden")
-                    denolc.classList.add('slide-out');
-                    denolc.classList.remove('slide-in');
                     //$('#calendar').css("background-color", "grey")
-                    $('#calendar').css("display", "block")
                     content.classList.remove('slide-in-right');
                     content.classList.add('slide-in');
-                    Calendar.render()
-                }, 1)
+                    window.setTimeout(()=> {
+                       $('#denolc').css("visibility", "hidden")
+                       $('#calendar').css("visibility", "visible")
+                        denolc.classList.add('slide-out');
+                        denolc.classList.remove('slide-in');
+                        Calendar.render()
+                    }, 750)
+                }, 750)
               }, 750)
           }
 
