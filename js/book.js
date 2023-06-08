@@ -252,326 +252,326 @@ var BookingManager = function() {
         }
         return null
     }
-        const date = filterDate()
-        console.log("BookingManager() params=[" + date + "]")
+    const date = filterDate()
+    console.log("BookingManager() params=[" + date + "]")
 
-                function switchDay(offset) {
-                    if (CurrentView === 'timeGridDay') {
-                        setCurrentDate(Calendar, addToDate(CurrentDate, offset))
-                        pushState(CurrentDate)
-                    } else {
-                        setCurrentDate(Calendar, addToMonth(CurrentDate, offset))
-                        pushState(CurrentDate)
-                    }
-                    console.log('Next/Prev button clicked; new date is [' + CurrentDate + "]");
+    function switchDay(offset) {
+        if (CurrentView === 'timeGridDay') {
+            setCurrentDate(Calendar, addToDate(CurrentDate, offset))
+            pushState(CurrentDate)
+        } else {
+            setCurrentDate(Calendar, addToMonth(CurrentDate, offset))
+            pushState(CurrentDate)
+        }
+        console.log('Next/Prev button clicked; new date is [' + CurrentDate + "]");
+    }
+    function startCalendar(identifier, setCalendar) {
+          const calendarEl = document.getElementById(identifier)
+            calendar = new FullCalendar.Calendar(calendarEl, {
+            customButtons: {
+              prev: {
+                text: 'Prev',
+                click: function(info) { switchDay(-1) }
+              },
+              next: {
+                text: 'Next',
+                click: function(info) { switchDay(1) }
+              }
+            },
+            initialView: 'dayGridMonth',
+            themeSystem: 'material',
+            visibleRange: function(currentDate) {
+                // Generate a new date for manipulating in the next step
+                var startDate = new Date(currentDate.valueOf());
+                var endDate = new Date(currentDate.valueOf());
+
+                // Adjust the start & end dates, respectively
+                //startDate.setDate(startDate.getDate() - 1); // One day in the past
+                endDate.setDate(endDate.getDate() + 90); // Two days into the future
+                console.log("In visibleRange function.")
+                return { start: startDate, end: endDate };
+              },
+            contentHeight: 'auto',
+            eventClassNames: function(arg) {
+                //console.log(JSON.stringify(arg))
+                if (arg.view.type === 'timeGridDay') {
+                    return [ 'appointment', 'confirmed' ]
                 }
-        function startCalendar(identifier, setCalendar) {
-              const calendarEl = document.getElementById(identifier)
-                calendar = new FullCalendar.Calendar(calendarEl, {
-                customButtons: {
-                  prev: {
-                    text: 'Prev',
-                    click: function(info) { switchDay(-1) }
-                  },
-                  next: {
-                    text: 'Next',
-                    click: function(info) { switchDay(1) }
-                  }
-                },
-                initialView: 'dayGridMonth',
-                themeSystem: 'material',
-                visibleRange: function(currentDate) {
-                    // Generate a new date for manipulating in the next step
-                    var startDate = new Date(currentDate.valueOf());
-                    var endDate = new Date(currentDate.valueOf());
-
-                    // Adjust the start & end dates, respectively
-                    //startDate.setDate(startDate.getDate() - 1); // One day in the past
-                    endDate.setDate(endDate.getDate() + 90); // Two days into the future
-                    console.log("In visibleRange function.")
-                    return { start: startDate, end: endDate };
-                  },
-                contentHeight: 'auto',
-                eventClassNames: function(arg) {
-                    //console.log(JSON.stringify(arg))
-                    if (arg.view.type === 'timeGridDay') {
-                        return [ 'appointment', 'confirmed' ]
-                    }
-                    return []
-                },
-                 eventClick: function(info) {
-                   console.log('Event clicked:', JSON.stringify(info));
-                   if (info.view.type === 'timeGridDay') {
-                      popupRequest({
-                          operation: 'changeappointmentrequest',
-                          datetime: info.event.start,
-                          usermessage: info.event.title,
-                          event: info.event,
-                      })
-                   } else {
-                        const newdate = convertDate(info.event.start)
-                        console.log("newdate=[" + info.event.start + "]")
-                        console.log("newdate=[" + newdate + "]")
-                        const dateonly = newdate.split('T')[0]
-                        setCurrentDate(Calendar, dateonly)
-                        pushState(dateonly)
-                   }
-                 },
-                 dateClick: function(info) {
-                  console.log('Clicked on: ' + info.dateStr);
-                  console.log('Coordinates: ' + JSON.stringify(info.jsEvent) ) //.pageX + ',' + info.jsEvent.pageY);
-                  const timeselect = info.dateStr.split("T")[1]
-                 if (info.view.type !== 'timeGridDay') {
-                      setCurrentDate(Calendar, info.dateStr)
-                      pushState(info.dateStr)
-                 } else {
-                      popupRequest({
-                          operation: 'showappointmentrequest',
-                          datetime: info.dateStr,
-                          usermessage: "",
-                      })
-                  }
-                },
-                  headerToolbar: {
-                      center: '',
-                      end: 'prev,next',
-                  },
-                views: {
-                    timeGridDay: {
-                        buttonText: 'My Button',
-                        type: 'timeGridDay',
-                        allDaySlot: false,
-                        slotMinTime: '10:00:00',
-                        slotDuration: '00:30:00',
-                        displayEventTime: false,
-                    }
-                },
-               })
-
-             setCalendar(calendar)
-
-              calendar.render()
-       }
-
-        document.getElementById("calendar").addEventListener("click", function(event) {
-            const x = event.clientX;
-            const y = event.clientY;
-            console.log("Clicked at position (${x}, ${y})")
-            Completion.setLastClickEvent(event)
-            closeSidebar()
-        })
-        function createEvent(data) {
-          function getTitle() {
-            try {
-                if (data.request.usermessage.length > 0) {
-                    return data.request.usermessage
+                return []
+            },
+             eventClick: function(info) {
+               console.log('Event clicked:', JSON.stringify(info));
+               if (info.view.type === 'timeGridDay') {
+                  popupRequest({
+                      operation: 'changeappointmentrequest',
+                      datetime: info.event.start,
+                      usermessage: info.event.title,
+                      event: info.event,
+                  })
+               } else {
+                    const newdate = convertDate(info.event.start)
+                    console.log("newdate=[" + info.event.start + "]")
+                    console.log("newdate=[" + newdate + "]")
+                    const dateonly = newdate.split('T')[0]
+                    setCurrentDate(Calendar, dateonly)
+                    pushState(dateonly)
+               }
+             },
+             dateClick: function(info) {
+              console.log('Clicked on: ' + info.dateStr);
+              console.log('Coordinates: ' + JSON.stringify(info.jsEvent) ) //.pageX + ',' + info.jsEvent.pageY);
+              const timeselect = info.dateStr.split("T")[1]
+             if (info.view.type !== 'timeGridDay') {
+                  setCurrentDate(Calendar, info.dateStr)
+                  pushState(info.dateStr)
+             } else {
+                  popupRequest({
+                      operation: 'showappointmentrequest',
+                      datetime: info.dateStr,
+                      usermessage: "",
+                  })
+              }
+            },
+              headerToolbar: {
+                  center: '',
+                  end: 'prev,next',
+              },
+            views: {
+                timeGridDay: {
+                    buttonText: 'My Button',
+                    type: 'timeGridDay',
+                    allDaySlot: false,
+                    slotMinTime: '10:00:00',
+                    slotDuration: '00:30:00',
+                    displayEventTime: false,
                 }
-            } catch (e) {
-                console(e.toString())
+            },
+           })
+
+         setCalendar(calendar)
+
+          calendar.render()
+   }
+
+    document.getElementById("calendar").addEventListener("click", function(event) {
+        const x = event.clientX;
+        const y = event.clientY;
+        console.log("Clicked at position (${x}, ${y})")
+        Completion.setLastClickEvent(event)
+        closeSidebar()
+    })
+    function createEvent(data) {
+      function getTitle() {
+        try {
+            if (data.request.usermessage.length > 0) {
+                return data.request.usermessage
             }
-            return "Appointment booked."
+        } catch (e) {
+            console(e.toString())
+        }
+        return "Appointment booked."
+      }
+      //var event = {
+      //  title: getTitle(),
+      //  start: convertDate(data.request.datetime, 0),
+      //  end: convertDate(data.request.datetime, 30)
+      //}
+      //console.log(JSON.stringify(event))
+      //Calendar.addEvent(event);
+      Calendar.getEvents().forEach(function(event) {
+          event.remove();
+        });
+      Calendar.batchRendering(() => {
+        data.events.forEach((newevent) => {
+          console.log(JSON.stringify(newevent))
+          Calendar.addEvent(newevent);
+        });
+      });
+    }
+
+    function receiveMessage(event) {
+      // Check if the message is coming from the expected origin
+      console.log("rec mess")
+       console.log("origin=[" + JSON.stringify(event) + "]")
+       if (event.isTrusted === true) {
+          // Process the message data
+          var message = event.data;
+          console.log("Received message B:", message);
+          try {
+            const jsonmsg = JSON.parse(message)
+            if (jsonmsg.operation === 'createevent') {
+                console.log("create: " + message)
+                createEvent(jsonmsg.data)
+            } else
+            if (jsonmsg.operation === "readappointments") {
+                console.log("reading appointments: " + message)
+                createEvent(jsonmsg.data)
+            }
+          } catch (e) {
+            console.log(e.toString())
           }
-          //var event = {
-          //  title: getTitle(),
-          //  start: convertDate(data.request.datetime, 0),
-          //  end: convertDate(data.request.datetime, 30)
-          //}
-          //console.log(JSON.stringify(event))
-          //Calendar.addEvent(event);
-          Calendar.getEvents().forEach(function(event) {
-              event.remove();
-            });
-          Calendar.batchRendering(() => {
-            data.events.forEach((newevent) => {
-              console.log(JSON.stringify(newevent))
-              Calendar.addEvent(newevent);
-            });
-          });
-        }
+       }
+    }
+    function registerForEvents() {
+        // Add an event listener for the message event
+        window.addEventListener("message", receiveMessage, false);
+        console.log("Adding event listener")
+    }
+    registerForEvents()
 
-        function receiveMessage(event) {
-          // Check if the message is coming from the expected origin
-          console.log("rec mess")
-           console.log("origin=[" + JSON.stringify(event) + "]")
-           if (event.isTrusted === true) {
-              // Process the message data
-              var message = event.data;
-              console.log("Received message B:", message);
-              try {
-                const jsonmsg = JSON.parse(message)
-                if (jsonmsg.operation === 'createevent') {
-                    console.log("create: " + message)
-                    createEvent(jsonmsg.data)
-                } else
-                if (jsonmsg.operation === "readappointments") {
-                    console.log("reading appointments: " + message)
-                    createEvent(jsonmsg.data)
-                }
-              } catch (e) {
-                console.log(e.toString())
-              }
-           }
-        }
-        function registerForEvents() {
-            // Add an event listener for the message event
-            window.addEventListener("message", receiveMessage, false);
-            console.log("Adding event listener")
-        }
-        registerForEvents()
+    function initializeSwipeBasic() {
+        const element = document.getElementById('calendar');
+        let touchStartX = 0;
+        let touchEndX = 0;
+        element.addEventListener('touchstart', function(event) {
+          touchStartX = event.touches[0].clientX;
+        });
+        element.addEventListener('touchend', function(event) {
+          touchEndX = event.changedTouches[0].clientX;
+          const swipeDistance = touchEndX - touchStartX;
+          if (Math.abs(swipeDistance) > 50) {
+            if (swipeDistance > 0) {
+              console.log('Swiped right');
+              Calendar.next()
+            } else {
+              console.log('Swiped left');
+              Calendar.prev()
+            }
+          }
+        });
+    }
+    function initializeSwipe() {
+        const container = document.getElementById('container');
+        const content = document.getElementById('calendar');
+        const cloned =  document.getElementById('cloned')
+        const denolc =  document.getElementById('denolc')
 
-        function initializeSwipeBasic() {
-            const element = document.getElementById('calendar');
-            let touchStartX = 0;
-            let touchEndX = 0;
-            element.addEventListener('touchstart', function(event) {
-              touchStartX = event.touches[0].clientX;
-            });
-            element.addEventListener('touchend', function(event) {
-              touchEndX = event.changedTouches[0].clientX;
-              const swipeDistance = touchEndX - touchStartX;
-              if (Math.abs(swipeDistance) > 50) {
-                if (swipeDistance > 0) {
-                  console.log('Swiped right');
-                  Calendar.next()
-                } else {
-                  console.log('Swiped left');
-                  Calendar.prev()
-                }
-              }
-            });
-        }
-        function initializeSwipe() {
-            const container = document.getElementById('container');
-            const content = document.getElementById('calendar');
-            const cloned =  document.getElementById('cloned')
-            const denolc =  document.getElementById('denolc')
+        denolc.classList.add('slide-out');
+        cloned.classList.add('slide-out-right-show');
 
-            denolc.classList.add('slide-out');
-            cloned.classList.add('slide-out-right-show');
+        let startX = 0;
+        let currentX = 0;
 
-            let startX = 0;
-            let currentX = 0;
+        container.addEventListener('touchstart', function(event) {
+          startX = event.touches[0].clientX;
+          currentX = startX;
+        });
 
-            container.addEventListener('touchstart', function(event) {
-              startX = event.touches[0].clientX;
-              currentX = startX;
-            });
+        container.addEventListener('touchmove', function(event) {
+          currentX = event.touches[0].clientX;
+        });
 
-            container.addEventListener('touchmove', function(event) {
-              currentX = event.touches[0].clientX;
-            });
+        //$('#calendar').css("background-color", "blue")
+        container.addEventListener('touchend', function(event) {
+          const swipeDistance = startX - currentX;
 
+          if (swipeDistance > 50) {
             //$('#calendar').css("background-color", "blue")
-            container.addEventListener('touchend', function(event) {
-              const swipeDistance = startX - currentX;
-
-              if (swipeDistance > 50) {
-                //$('#calendar').css("background-color", "blue")
-                $('#cloned').css("visibility", "visible")
-                $('#calendar').css("display", "block")
-                content.classList.remove('slide-in');
-                content.classList.add('slide-out');
-                cloned.classList.add('slide-in')
-                cloned.classList.remove('slide-out-right-show')
-                  console.log('Swiped left [' + CalendarCloned + "]")
+            $('#cloned').css("visibility", "visible")
+            $('#calendar').css("display", "block")
+            content.classList.remove('slide-in');
+            content.classList.add('slide-out');
+            cloned.classList.add('slide-in')
+            cloned.classList.remove('slide-out-right-show')
+              console.log('Swiped left [' + CalendarCloned + "]")
+                switchDay(1)
                 setCurrentDate(CalendarCloned, CurrentDate)
                 CalendarCloned.render()
-                  window.setTimeout(()=> {
-                    //$('#calendar').css("background-color", "red")
-                    $('#calendar').css("display", "none")
-                    //Calendar.next()
-                    switchDay(1)
-                    content.classList.remove('slide-out');
-                    content.classList.add('slide-out-right');
-                    window.setTimeout(()=> {
-                         $('#cloned').css("visibility", "hidden")
-                       //$('#calendar').css("background-color", "green")
-                        $('#calendar').css("display", "block")
-                        content.classList.remove('slide-out-right');
-                        content.classList.add('slide-in');
-                        cloned.classList.add('slide-out-right-show');
-                        cloned.classList.remove('slide-in')
-                        Calendar.render()
-                    }, 1)
-                  }, 500)
-              } else if (swipeDistance < -50) {
-                //$('#calendar').css("background-color", "yellow")
-                $('#denolc').css("visibility", "visible")
-                $('#calendar').css("display", "block")
-                content.classList.remove('slide-in');
-                content.classList.add('slide-out-right-show');
-                denolc.classList.add('slide-in')
-                denolc.classList.remove('slide-out')
-                  console.log('Swiped right');
+              window.setTimeout(()=> {
+                //$('#calendar').css("background-color", "red")
+                $('#calendar').css("display", "none")
+                //Calendar.next()
+                content.classList.remove('slide-out');
+                content.classList.add('slide-out-right');
+                window.setTimeout(()=> {
+                     $('#cloned').css("visibility", "hidden")
+                   //$('#calendar').css("background-color", "green")
+                    $('#calendar').css("display", "block")
+                    content.classList.remove('slide-out-right');
+                    content.classList.add('slide-in');
+                    cloned.classList.add('slide-out-right-show');
+                    cloned.classList.remove('slide-in')
+                    Calendar.render()
+                }, 1)
+              }, 750)
+          } else if (swipeDistance < -50) {
+            //$('#calendar').css("background-color", "yellow")
+            $('#denolc').css("visibility", "visible")
+            $('#calendar').css("display", "block")
+            content.classList.remove('slide-in');
+            content.classList.add('slide-out-right-show');
+            denolc.classList.add('slide-in')
+            denolc.classList.remove('slide-out')
+              console.log('Swiped right');
+                switchDay(-1)
                 setCurrentDate(CalendarDenolc, CurrentDate)
                 CalendarDenolc.render()
-                  window.setTimeout(()=> {
-                    //$('#calendar').css("background-color", "black")
-                    $('#calendar').css("display", "none")
-                    //Calendar.prev()
-                    switchDay(-1)
-                    content.classList.remove('slide-out-right-show');
-                    content.classList.add('slide-in-right');
-                    window.setTimeout(()=> {
-                         $('#denolc').css("visibility", "hidden")
-                        denolc.classList.add('slide-out');
-                        denolc.classList.remove('slide-in');
-                        //$('#calendar').css("background-color", "grey")
-                        $('#calendar').css("display", "block")
-                        content.classList.remove('slide-in-right');
-                        content.classList.add('slide-in');
-                        Calendar.render()
-                    }, 1)
-                  }, 500)
-              }
-
-              startX = 0;
-              currentX = 0;
-            });
-        }
-
-        function duplicateView(identifier, newid) {
-            const originalDiv = document.getElementById(identifier);
-            const clonedDiv = originalDiv.cloneNode(true);
-            clonedDiv.id = newid;
-            clonedDiv.classList.add('duplicated');
-            const parentElement = originalDiv.parentElement;
-            parentElement.appendChild(clonedDiv);
-        }
-
-        function cloneCalendar(calendar) {
-            Calendar = calendar
-             if (date != null) {
-                  setCurrentDate(calendar, date)
-                  //pushState(CurrentDate)
-              } else {
-                  console.log("Default current month.")
-                  setCurrentDate(calendar, getMonth(calendar.getDate()))
-              }
-            duplicateView('calendar', 'cloned')
-            duplicateView('calendar', 'denolc')
-
-            console.log("Before setting alternate cloned calendar.")
-
-            startCalendar('cloned', (calendar)=> {
-                console.log("Setting primary cloned calendar. [" + calendar + "]")
-                CalendarCloned = calendar
-                startCalendar('denolc', (calendar)=> {
-                    console.log("Setting alternate cloned calendar.")
-                    CalendarDenolc = calendar
-
-                    initializeSwipe()
+              window.setTimeout(()=> {
+                //$('#calendar').css("background-color", "black")
+                $('#calendar').css("display", "none")
+                //Calendar.prev()
+                content.classList.remove('slide-out-right-show');
+                content.classList.add('slide-in-right');
+                window.setTimeout(()=> {
+                     $('#denolc').css("visibility", "hidden")
+                    denolc.classList.add('slide-out');
+                    denolc.classList.remove('slide-in');
+                    //$('#calendar').css("background-color", "grey")
+                    $('#calendar').css("display", "block")
+                    content.classList.remove('slide-in-right');
+                    content.classList.add('slide-in');
                     Calendar.render()
+                }, 1)
+              }, 750)
+          }
 
-                })
+          startX = 0;
+          currentX = 0;
+        });
+    }
+
+    function duplicateView(identifier, newid) {
+        const originalDiv = document.getElementById(identifier);
+        const clonedDiv = originalDiv.cloneNode(true);
+        clonedDiv.id = newid;
+        clonedDiv.classList.add('duplicated');
+        const parentElement = originalDiv.parentElement;
+        parentElement.appendChild(clonedDiv);
+    }
+
+    function cloneCalendar(calendar) {
+        Calendar = calendar
+         if (date != null) {
+              setCurrentDate(calendar, date)
+              //pushState(CurrentDate)
+          } else {
+              console.log("Default current month.")
+              setCurrentDate(calendar, getMonth(calendar.getDate()))
+          }
+        duplicateView('calendar', 'cloned')
+        duplicateView('calendar', 'denolc')
+
+        console.log("Before setting alternate cloned calendar.")
+
+        startCalendar('cloned', (calendar)=> {
+            console.log("Setting primary cloned calendar. [" + calendar + "]")
+            CalendarCloned = calendar
+            startCalendar('denolc', (calendar)=> {
+                console.log("Setting alternate cloned calendar.")
+                CalendarDenolc = calendar
+
+                initializeSwipe()
+                Calendar.render()
+
             })
-        }
+        })
+    }
 
-        function initializeCalendar() {
-            document.addEventListener('DOMContentLoaded', startCalendar('calendar', cloneCalendar))
-        }
+    function initializeCalendar() {
+        document.addEventListener('DOMContentLoaded', startCalendar('calendar', cloneCalendar))
+    }
 
-        initializeCalendar()
+    initializeCalendar()
 
 
     return {
