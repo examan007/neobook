@@ -419,35 +419,17 @@ var BookingManager = function() {
     }
     registerForEvents()
 
-    function initializeSwipeBasic() {
-        const element = document.getElementById('calendar');
-        let touchStartX = 0;
-        let touchEndX = 0;
-        element.addEventListener('touchstart', function(event) {
-          touchStartX = event.touches[0].clientX;
-        });
-        element.addEventListener('touchend', function(event) {
-          touchEndX = event.changedTouches[0].clientX;
-          const swipeDistance = touchEndX - touchStartX;
-          if (Math.abs(swipeDistance) > 50) {
-            if (swipeDistance > 0) {
-              console.log('Swiped right');
-              Calendar.next()
-            } else {
-              console.log('Swiped left');
-              Calendar.prev()
-            }
-          }
-        });
-    }
     function initializeSwipe() {
         const container = document.getElementById('container');
         const content = document.getElementById('calendar');
         const cloned =  document.getElementById('cloned')
         const denolc =  document.getElementById('denolc')
 
+        denolc.classList.add('calendar-ease')
         denolc.classList.add('slide-out');
+        cloned.classList.add('calendar-ease')
         cloned.classList.add('slide-out-right-show');
+        content.classList.add('calendar-ease')
         content.classList.add('slide-in')
 
         let startX = 0;
@@ -466,11 +448,16 @@ var BookingManager = function() {
         //$('#calendar').css("background-color", "blue")
         container.addEventListener('touchend', function(event) {
             if (blockflag) {
-                return;
+                //return;
             }
             blockflag = true
 
           const swipeDistance = startX - currentX;
+          function reset() {
+            blockflag = false
+            startX = 0;
+            currentX = 0;
+          }
 
           if (swipeDistance > 50) {
             $('#cloned').css("visibility", "visible")
@@ -485,6 +472,8 @@ var BookingManager = function() {
                 CalendarCloned.render()
               window.setTimeout(()=> {
                 $('#calendar').css("visibility", "hidden")
+                content.classList.remove('calendar-ease')
+                content.classList.add('calendar-quick')
                 content.classList.remove('slide-out');
                 content.classList.add('slide-in');
                 window.setTimeout(()=> {
@@ -493,8 +482,10 @@ var BookingManager = function() {
                     Calendar.render()
                     cloned.classList.remove('slide-in')
                     cloned.classList.add('slide-out-right-show');
-                    blockflag = false
-                }, 500)
+                    content.classList.remove('calendar-quick')
+                    content.classList.add('calendar-ease')
+                    reset()
+                }, 1)
               }, 500)
           } else if (swipeDistance < -50) {
             $('#denolc').css("visibility", "visible")
@@ -509,6 +500,8 @@ var BookingManager = function() {
                 CalendarDenolc.render()
               window.setTimeout(()=> {
                 $('#calendar').css("visibility", "hidden")
+                content.classList.remove('calendar-ease')
+                content.classList.add('calendar-quick')
                 content.classList.remove('slide-out-right-show');
                 content.classList.add('slide-in');
                 window.setTimeout(()=> {
@@ -517,13 +510,12 @@ var BookingManager = function() {
                     Calendar.render()
                     denolc.classList.remove('slide-in');
                     denolc.classList.add('slide-out');
-                    blockflag = false
-                }, 500)
+                    content.classList.remove('calendar-quick')
+                    content.classList.add('calendar-ease')
+                    reset()
+                }, 1)
               }, 500)
           }
-
-          startX = 0;
-          currentX = 0;
         });
     }
 
