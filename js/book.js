@@ -548,8 +548,8 @@ var BookingManager = function() {
               console.log("Default current month.")
               setCurrentDate(calendar, getMonth(calendar.getDate()))
           }
-        duplicateView('calendar', 'cloned')
-        duplicateView('calendar', 'denolc')
+        //duplicateView('calendar', 'cloned')
+        //duplicateView('calendar', 'denolc')
 
         console.log("Before setting alternate cloned calendar.")
 

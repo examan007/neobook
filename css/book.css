@@ -1,4 +1,4 @@
-#calendar, .duplicated {
+#calendar, #cloned, #denolc {
     overflow: hidden !important;
     position: absolute;
     top: 0;
@@ -35,7 +35,7 @@
 }
 #container {
   overflow: hidden;
-  height: 200px;
+  height: 100%;
 }
 .slide-out {
   display: block;
@@ -63,11 +63,11 @@
 }
 #cloned {
     z-index: 100;
-    background-color: white;
-    margin-top: 30px;
+    margin: 7%;
+    width: 86%
 }
 #denolc {
     z-index: 100;
-    background-color: white;
-    margin-top: 30px;
+    margin: 7%;
+    width: 86%
 }
