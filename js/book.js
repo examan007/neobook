@@ -448,9 +448,11 @@ var BookingManager = function() {
 
         denolc.classList.add('slide-out');
         cloned.classList.add('slide-out-right-show');
+        content.classList.add('slide-in')
 
         let startX = 0;
         let currentX = 0;
+        let blockflag = false;
 
         container.addEventListener('touchstart', function(event) {
           startX = event.touches[0].clientX;
@@ -463,68 +465,59 @@ var BookingManager = function() {
 
         //$('#calendar').css("background-color", "blue")
         container.addEventListener('touchend', function(event) {
+            if (blockflag) {
+                return;
+            }
+            blockflag = true
+
           const swipeDistance = startX - currentX;
 
           if (swipeDistance > 50) {
-            //$('#calendar').css("background-color", "blue")
             $('#cloned').css("visibility", "visible")
             $('#calendar').css("visibility", "visible")
             content.classList.remove('slide-in');
             content.classList.add('slide-out');
-            cloned.classList.add('slide-in')
             cloned.classList.remove('slide-out-right-show')
+            cloned.classList.add('slide-in')
               console.log('Swiped left [' + CalendarCloned + "]")
                 switchDay(1)
                 setCurrentDate(CalendarCloned, CurrentDate)
                 CalendarCloned.render()
               window.setTimeout(()=> {
-                //$('#calendar').css("background-color", "red")
                 $('#calendar').css("visibility", "hidden")
-                //Calendar.next()
                 content.classList.remove('slide-out');
-                content.classList.add('slide-out-right');
+                content.classList.add('slide-in');
                 window.setTimeout(()=> {
-                   //$('#calendar').css("background-color", "green")
-                    content.classList.remove('slide-out-right');
-                    content.classList.add('slide-in');
-                    window.setTimeout(()=> {
-                        $('#cloned').css("visibility", "hidden")
-                        $('#calendar').css("visibility", "visible")
-                        cloned.classList.add('slide-out-right-show');
-                        cloned.classList.remove('slide-in')
-                        Calendar.render()
-                    }, 500)
+                    $('#cloned').css("visibility", "hidden")
+                    $('#calendar').css("visibility", "visible")
+                    Calendar.render()
+                    cloned.classList.remove('slide-in')
+                    cloned.classList.add('slide-out-right-show');
+                    blockflag = false
                 }, 500)
               }, 500)
           } else if (swipeDistance < -50) {
-            //$('#calendar').css("background-color", "yellow")
             $('#denolc').css("visibility", "visible")
             $('#calendar').css("visibility", "visible")
             content.classList.remove('slide-in');
             content.classList.add('slide-out-right-show');
-            denolc.classList.add('slide-in')
             denolc.classList.remove('slide-out')
+            denolc.classList.add('slide-in')
               console.log('Swiped right');
                 switchDay(-1)
                 setCurrentDate(CalendarDenolc, CurrentDate)
                 CalendarDenolc.render()
               window.setTimeout(()=> {
-                //$('#calendar').css("background-color", "black")
                 $('#calendar').css("visibility", "hidden")
-                //Calendar.prev()
                 content.classList.remove('slide-out-right-show');
-                content.classList.add('slide-in-right');
+                content.classList.add('slide-in');
                 window.setTimeout(()=> {
-                    //$('#calendar').css("background-color", "grey")
-                    content.classList.remove('slide-in-right');
-                    content.classList.add('slide-in');
-                    window.setTimeout(()=> {
-                       $('#denolc').css("visibility", "hidden")
-                       $('#calendar').css("visibility", "visible")
-                        denolc.classList.add('slide-out');
-                        denolc.classList.remove('slide-in');
-                        Calendar.render()
-                    }, 500)
+                   $('#denolc').css("visibility", "hidden")
+                   $('#calendar').css("visibility", "visible")
+                    Calendar.render()
+                    denolc.classList.remove('slide-in');
+                    denolc.classList.add('slide-out');
+                    blockflag = false
                 }, 500)
               }, 500)
           }

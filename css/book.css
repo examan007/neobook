@@ -9,8 +9,10 @@
     display: block;
     box-sizing: border-box;
     z-index: 250;
-    border-radius: 50px;
     transition: transform 0.5s ease-out;
+}
+#calendar {
+    border-radius: 50px;
 }
 .appointment {
     font-size: 1.5em;
