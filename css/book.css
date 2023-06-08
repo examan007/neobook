@@ -10,6 +10,7 @@
     box-sizing: border-box;
     z-index: 250;
     border-radius: 50px;
+    transition: transform 0.5s ease-out;
 }
 .appointment {
     font-size: 1.5em;
@@ -36,12 +37,6 @@
   overflow: hidden;
   height: 200px;
 }
-
-#calendar, .duplicated {
-  height: 100%;
-  transition: transform 0.5s ease-out;
-}
-
 .slide-out {
   display: block;
   transform: translateX(-100%);
@@ -54,7 +49,6 @@
   display: block;
   transform: translateX(100%);
 }
-
 .slide-in {
   display: block;
   transform: translateX(0%);
@@ -67,12 +61,13 @@
   display: block;
   transform: translateX(100%);
 }
-
 #cloned {
     z-index: 100;
-    background-color: black;
+    background-color: white;
+    margin-top: 30px;
 }
 #denolc {
     z-index: 100;
-    background-color: red;
+    background-color: white;
+    margin-top: 30px;
 }

@@ -78,6 +78,8 @@ var BookingManager = function() {
     const Completion = CompletionMethodObj()
     const searchParams = new URLSearchParams(getParameters());
     var Calendar = null
+    var CalendarCloned = null
+    var CalendarDenolc = null
     function sendToParent(message) {
         try {
             window.parent.postMessage(JSON.stringify(message), "*");
@@ -181,12 +183,12 @@ var BookingManager = function() {
           }
         })
     }
-    var CurrentDate = null
+    var CurrentDate = "2023-01-01"
     var CurrentView = null
-    function setCurrentDate(indateStr) {
+    function setCurrentDate(calendar, indateStr) {
         const dateStr = indateStr.replace(/^[^\d]+/, "");
         console.log("select date = [" + dateStr + "]")
-        if (CurrentDate !== dateStr)
+        if (CurrentDate !== dateStr || calendar !== Calendar)
         try {
             function getInitialState () {
                 if (dateStr.length < 8) {
@@ -203,7 +205,7 @@ var BookingManager = function() {
             }
             const state = getInitialState()
             var parsedDate = moment(dateStr, state.formatstring);
-            Calendar.changeView(state.currentview, dateStr);
+            calendar.changeView(state.currentview, dateStr);
             CurrentView = state.currentview
             CurrentDate = dateStr
             console.log("CurrentDate=[" + CurrentDate + "]")
@@ -253,24 +255,19 @@ var BookingManager = function() {
         const date = filterDate()
         console.log("BookingManager() params=[" + date + "]")
 
-        function startCalendar() {
-            document.addEventListener('DOMContentLoaded', function() {
-              const calendarEl = document.getElementById('calendar')
                 function switchDay(offset) {
                     if (CurrentView === 'timeGridDay') {
-                        setCurrentDate(addToDate(CurrentDate, offset))
-                        pushState(CurrentDate)
-                    } else
-                    if (offset === 1) {
-                        setCurrentDate(addToMonth(CurrentDate, offset))
+                        setCurrentDate(Calendar, addToDate(CurrentDate, offset))
                         pushState(CurrentDate)
                     } else {
-                        setCurrentDate(addToMonth(CurrentDate, offset))
+                        setCurrentDate(Calendar, addToMonth(CurrentDate, offset))
                         pushState(CurrentDate)
                     }
                     console.log('Next/Prev button clicked; new date is [' + CurrentDate + "]");
                 }
-                Calendar = new FullCalendar.Calendar(calendarEl, {
+        function startCalendar(identifier, setCalendar) {
+              const calendarEl = document.getElementById(identifier)
+                calendar = new FullCalendar.Calendar(calendarEl, {
                 customButtons: {
                   prev: {
                     text: 'Prev',
@@ -316,7 +313,7 @@ var BookingManager = function() {
                         console.log("newdate=[" + info.event.start + "]")
                         console.log("newdate=[" + newdate + "]")
                         const dateonly = newdate.split('T')[0]
-                        setCurrentDate(dateonly)
+                        setCurrentDate(Calendar, dateonly)
                         pushState(dateonly)
                    }
                  },
@@ -325,7 +322,7 @@ var BookingManager = function() {
                   console.log('Coordinates: ' + JSON.stringify(info.jsEvent) ) //.pageX + ',' + info.jsEvent.pageY);
                   const timeselect = info.dateStr.split("T")[1]
                  if (info.view.type !== 'timeGridDay') {
-                      setCurrentDate(info.dateStr)
+                      setCurrentDate(Calendar, info.dateStr)
                       pushState(info.dateStr)
                  } else {
                       popupRequest({
@@ -351,17 +348,11 @@ var BookingManager = function() {
                 },
                })
 
-             if (date != null) {
-                  setCurrentDate(date)
-                  //pushState(CurrentDate)
-              } else {
-                  console.log("Default current month.")
-                  setCurrentDate(getMonth(Calendar.getDate()))
-              }
-              Calendar.render()
-            })
-        }
-        startCalendar()
+             setCalendar(calendar)
+
+              calendar.render()
+       }
+
         document.getElementById("calendar").addEventListener("click", function(event) {
             const x = event.clientX;
             const y = event.clientY;
@@ -470,26 +461,31 @@ var BookingManager = function() {
               currentX = event.touches[0].clientX;
             });
 
-            $('#calendar').css("background-color", "blue")
+            //$('#calendar').css("background-color", "blue")
             container.addEventListener('touchend', function(event) {
               const swipeDistance = startX - currentX;
 
               if (swipeDistance > 50) {
-                $('#calendar').css("background-color", "blue")
+                //$('#calendar').css("background-color", "blue")
+                $('#cloned').css("visibility", "visible")
                 $('#calendar').css("display", "block")
                 content.classList.remove('slide-in');
                 content.classList.add('slide-out');
-                cloned.classList.remove('slide-in')
-                cloned.classList.add('slide-out-right-show')
-                  console.log('Swiped left');
+                cloned.classList.add('slide-in')
+                cloned.classList.remove('slide-out-right-show')
+                  console.log('Swiped left [' + CalendarCloned + "]")
+                setCurrentDate(CalendarCloned, CurrentDate)
+                CalendarCloned.render()
                   window.setTimeout(()=> {
-                    $('#calendar').css("background-color", "red")
+                    //$('#calendar').css("background-color", "red")
                     $('#calendar').css("display", "none")
-                    Calendar.next()
+                    //Calendar.next()
+                    switchDay(1)
                     content.classList.remove('slide-out');
                     content.classList.add('slide-out-right');
                     window.setTimeout(()=> {
-                        $('#calendar').css("background-color", "green")
+                         $('#cloned').css("visibility", "hidden")
+                       //$('#calendar').css("background-color", "green")
                         $('#calendar').css("display", "block")
                         content.classList.remove('slide-out-right');
                         content.classList.add('slide-in');
@@ -499,26 +495,31 @@ var BookingManager = function() {
                     }, 1)
                   }, 500)
               } else if (swipeDistance < -50) {
-                $('#calendar').css("background-color", "yellow")
+                //$('#calendar').css("background-color", "yellow")
+                $('#denolc').css("visibility", "visible")
                 $('#calendar').css("display", "block")
                 content.classList.remove('slide-in');
                 content.classList.add('slide-out-right-show');
                 denolc.classList.add('slide-in')
                 denolc.classList.remove('slide-out')
                   console.log('Swiped right');
+                setCurrentDate(CalendarDenolc, CurrentDate)
+                CalendarDenolc.render()
                   window.setTimeout(()=> {
-                    $('#calendar').css("background-color", "black")
+                    //$('#calendar').css("background-color", "black")
                     $('#calendar').css("display", "none")
-                    Calendar.prev()
+                    //Calendar.prev()
+                    switchDay(-1)
                     content.classList.remove('slide-out-right-show');
                     content.classList.add('slide-in-right');
                     window.setTimeout(()=> {
-                        $('#calendar').css("background-color", "grey")
+                         $('#denolc').css("visibility", "hidden")
+                        denolc.classList.add('slide-out');
+                        denolc.classList.remove('slide-in');
+                        //$('#calendar').css("background-color", "grey")
                         $('#calendar').css("display", "block")
                         content.classList.remove('slide-in-right');
                         content.classList.add('slide-in');
-                        denolc.classList.add('slide-out');
-                        denolc.classList.remove('slide-in');
                         Calendar.render()
                     }, 1)
                   }, 500)
@@ -537,10 +538,41 @@ var BookingManager = function() {
             const parentElement = originalDiv.parentElement;
             parentElement.appendChild(clonedDiv);
         }
-        duplicateView('calendar', 'cloned')
-        duplicateView('calendar', 'denolc')
 
-        initializeSwipe()
+        function cloneCalendar(calendar) {
+            Calendar = calendar
+             if (date != null) {
+                  setCurrentDate(calendar, date)
+                  //pushState(CurrentDate)
+              } else {
+                  console.log("Default current month.")
+                  setCurrentDate(calendar, getMonth(calendar.getDate()))
+              }
+            duplicateView('calendar', 'cloned')
+            duplicateView('calendar', 'denolc')
+
+            console.log("Before setting alternate cloned calendar.")
+
+            startCalendar('cloned', (calendar)=> {
+                console.log("Setting primary cloned calendar. [" + calendar + "]")
+                CalendarCloned = calendar
+                startCalendar('denolc', (calendar)=> {
+                    console.log("Setting alternate cloned calendar.")
+                    CalendarDenolc = calendar
+
+                    initializeSwipe()
+                    Calendar.render()
+
+                })
+            })
+        }
+
+        function initializeCalendar() {
+            document.addEventListener('DOMContentLoaded', startCalendar('calendar', cloneCalendar))
+        }
+
+        initializeCalendar()
+
 
     return {
         show: function() {
