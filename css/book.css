@@ -78,3 +78,15 @@
     margin: 8%;
     width: 84%
 }
+.month-button {
+  right: 40px;
+  position: fixed;
+  background-color: #ffffff;
+  color: #000000;
+  border-radius: 5px;
+  text-decoration: none;
+  z-index: 500;
+  font-size: large;
+}
+
+

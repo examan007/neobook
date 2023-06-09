@@ -192,11 +192,13 @@ var BookingManager = function() {
         try {
             function getInitialState () {
                 if (dateStr.length < 8) {
+                    $('.month-button').css("display", "none")
                     return {
                         currentview: 'dayGridMonth',
                         formatstring: 'YYYY-MM'
                     }
                 } else {
+                    $('.month-button').css("display", "block")
                     return {
                         currentview: 'timeGridDay',
                         formatstring: 'YYYY-MM-DD'
@@ -416,6 +418,9 @@ var BookingManager = function() {
         // Add an event listener for the message event
         window.addEventListener("message", receiveMessage, false);
         console.log("Adding event listener")
+        $('.month-button').on("click", ()=> {
+            setCurrentDate(Calendar, getMonth(CurrentDate))
+        })
     }
     registerForEvents()
 
