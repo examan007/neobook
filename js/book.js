@@ -419,7 +419,9 @@ var BookingManager = function() {
         window.addEventListener("message", receiveMessage, false);
         console.log("Adding event listener")
         $('.month-button').on("click", ()=> {
-            setCurrentDate(Calendar, getMonth(CurrentDate))
+            const newdate = getMonth(CurrentDate)
+            setCurrentDate(Calendar, newdate)
+            pushState(newdate)
         })
     }
     registerForEvents()
