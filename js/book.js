@@ -1,6 +1,6 @@
 
 var BookingManager = function() {
-    const consolex = {
+    const console = {
         log: function(msg) {}
     }
     function getParameters() {
