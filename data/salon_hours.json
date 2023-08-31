@@ -22,5 +22,29 @@
     "display": "event",
     "color": "#e1e366",
     "daysOfWeek": [0]
+  },
+  {
+    "title": "Codi hours",
+    "startTime": "10:00:00",
+    "endTime": "14:00:00",
+    "display": "event",
+    "color": "#7c5acc",
+    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+  },
+  {
+    "title": "Jada hours",
+    "startTime": "12:00:00",
+    "endTime": "16:00:00",
+    "display": "event",
+    "color": "#5a82cc",
+    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+  },
+  {
+    "title": "Maryham hours",
+    "startTime": "14:00:00",
+    "endTime": "18:00:00",
+    "display": "event",
+    "color": "#5ab3cc",
+    "daysOfWeek": [1, 2, 3, 4, 5, 6]
   }
 ]
