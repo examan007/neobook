@@ -29,7 +29,7 @@
     "endTime": "14:00:00",
     "display": "event",
     "color": "#7c5acc",
-    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+    "daysOfWeek": [3, 4, 5, 6]
   },
   {
     "title": "Jada hours",
@@ -37,7 +37,7 @@
     "endTime": "16:00:00",
     "display": "event",
     "color": "#5a82cc",
-    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+    "daysOfWeek": [1, 2, 3, 4]
   },
   {
     "title": "Maryham hours",
@@ -45,6 +45,6 @@
     "endTime": "18:00:00",
     "display": "event",
     "color": "#5ab3cc",
-    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+    "daysOfWeek": [1, 2, 5, 6]
   }
 ]
