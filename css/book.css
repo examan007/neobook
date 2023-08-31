@@ -88,5 +88,7 @@
   z-index: 500;
   font-size: large;
 }
-
+.hiddenevent {
+    display: none;
+}
 

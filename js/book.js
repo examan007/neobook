@@ -35,7 +35,7 @@ var BookingManager = function() {
         const year = today.getFullYear();
 
         const todayString = `${year}-${month}-${date}`;
-        console.log(todayString); // outputs something like "4/27/2023"
+        console.log("getTodayDate = " + todayString); // outputs something like "4/27/2023"
         return todayString
     }
     var CompletionMethodObj = function (event) {
@@ -267,8 +267,17 @@ var BookingManager = function() {
         }
         console.log('Next/Prev button clicked; new date is [' + CurrentDate + "]");
     }
-    function startCalendar(identifier, setCalendar) {
-          const calendarEl = document.getElementById(identifier)
+    var SalonData = []
+    function startCalendar(identifier, setCalendar, indata) {
+            const calendarEl = document.getElementById(identifier)
+            const data = ()=> {
+                if (typeof(indata) === 'undefined') {
+                    return []
+                } else {
+                    SalonData = indata
+                    return indata
+                }
+            }
             calendar = new FullCalendar.Calendar(calendarEl, {
             customButtons: {
               prev: {
@@ -280,22 +289,35 @@ var BookingManager = function() {
                 click: function(info) { switchDay(1) }
               }
             },
+             select: function(start, end, allDay) {
+                var check = $.fullCalendar.formatDate(start,'yyyy-MM-dd');
+                var today = $.fullCalendar.formatDate(new Date(),'yyyy-MM-dd');
+                if(check < today)
+                {
+                    console.log("Exclude day")
+                }
+                else
+                {
+                    console.log("Allow day")
+                }
+            },
+            events: data(),
             initialView: 'dayGridMonth',
+            validRange: function() {
+                return {
+                  start: getTodayDate(0),
+                  end: getTodayDate(120)
+                }
+            },
             themeSystem: 'material',
-            visibleRange: function(currentDate) {
-                // Generate a new date for manipulating in the next step
-                var startDate = new Date(currentDate.valueOf());
-                var endDate = new Date(currentDate.valueOf());
-
-                // Adjust the start & end dates, respectively
-                //startDate.setDate(startDate.getDate() - 1); // One day in the past
-                endDate.setDate(endDate.getDate() + 90); // Two days into the future
-                console.log("In visibleRange function.")
-                return { start: startDate, end: endDate };
-              },
-            contentHeight: 'auto',
+             contentHeight: 'auto',
             eventClassNames: function(arg) {
-                //console.log(JSON.stringify(arg))
+                console.log("eventClassNames = " + JSON.stringify(arg))
+                const eventDate = new Date(arg.event.end)
+                const currentDate = new Date();
+                if (eventDate < currentDate) {
+                    return [ 'hiddenevent']
+                } else
                 if (arg.view.type === 'timeGridDay') {
                     return [ 'appointment', 'confirmed' ]
                 }
@@ -303,7 +325,15 @@ var BookingManager = function() {
             },
              eventClick: function(info) {
                console.log('Event clicked:', JSON.stringify(info));
-               if (info.view.type === 'timeGridDay') {
+
+               if (info.view.type === 'timeGridDay'
+                &&
+                   info.event.title !== "Salon hours"
+                &&
+                   info.event.title !== "Consult hours"
+                &&
+                   info.event.title !== "Salon and Consult hours"
+                ) {
                   popupRequest({
                       operation: 'changeappointmentrequest',
                       datetime: info.event.start,
@@ -382,12 +412,17 @@ var BookingManager = function() {
       //Calendar.addEvent(event);
       Calendar.getEvents().forEach(function(event) {
           event.remove();
-        });
+        })
       Calendar.batchRendering(() => {
         data.events.forEach((newevent) => {
           console.log(JSON.stringify(newevent))
           Calendar.addEvent(newevent);
-        });
+        })
+        SalonData.forEach((newevent) => {
+          console.log(JSON.stringify(newevent))
+          newevent.display = "event"
+          Calendar.addEvent(newevent);
+        })
       });
     }
 
@@ -563,12 +598,25 @@ var BookingManager = function() {
         })
     }
 
-    function initializeCalendar() {
-        document.addEventListener('DOMContentLoaded', startCalendar('calendar', cloneCalendar))
+    function initializeCalendar(name, data) {
+        document.addEventListener('DOMContentLoaded', startCalendar(name, cloneCalendar, data))
     }
 
-    initializeCalendar()
+    console.log("before initialization.")
 
+    function getSalonHours(name) {
+        const LogMgr = LoginManager().getData(
+            "data/salon_hours.json",
+            (data)=> {
+                console.log("new data = " + JSON.stringify(data))
+                initializeCalendar(name, data)
+            })
+    }
+    getSalonHours('calendar')
+    //window.setTimeout(getSalonHours('calendar'), 0)
+    //initializeCalendar('calendar')
+
+    console.log("Done initialization.")
 
     return {
         show: function() {
