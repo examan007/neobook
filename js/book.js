@@ -1,6 +1,6 @@
 
-var BookingManager = function() {
-    const console = {
+var BookingManager = function(AppMan) {
+    const consolex = {
         log: function(msg) {}
     }
     function getParameters() {
@@ -27,9 +27,7 @@ var BookingManager = function() {
             return server
         }
     }
-    function getTodayDate(daystoadd) {
-        const today = new Date();
-        today.setDate(today.getDate() + daystoadd);
+    function getFormattedDate(today) {
         const date = today.getDate();
         const month = today.getMonth() + 1; // months are zero-indexed, so add 1
         const year = today.getFullYear();
@@ -37,6 +35,11 @@ var BookingManager = function() {
         const todayString = `${year}-${month}-${date}`;
         console.log("getTodayDate = " + todayString); // outputs something like "4/27/2023"
         return todayString
+    }
+    function getTodayDate(daystoadd) {
+        const today = new Date();
+        today.setDate(today.getDate() + daystoadd);
+        return getFormattedDate(today)
     }
     var CompletionMethodObj = function (event) {
         var LastClickEvent = null
@@ -173,10 +176,23 @@ var BookingManager = function() {
         console.log("Pop up appointment request.")
         closeSidebar()
         Completion.getLastClickEvent( function (event) {
-            console.log(message.operation)
+            console.log("Completion: " + JSON.stringify(message))
           try {
               message.xpos = event.clientX
               message.ypos = event.clientY
+              console.log("Create: ypos = " + event.clientY )
+              const minutesToAddF = () => {
+                const mins = (((event.clientY - 106) / (460 - 106)) * 8 * 60)
+                return (((mins / 30) | 0) * 30)
+              }
+              console.log("datetime=[" + message.datetime + "]")
+              const minutesToAdd = minutesToAddF()
+              const eventStartTime = moment(message.datetime)
+              eventStartTime.set({ hour: 9, minute: 0, second: 0 });
+              eventStartTime.add(minutesToAdd, 'minutes')
+              message.datetime = eventStartTime.toISOString()
+              console.log("minutesToAdd=" + minutesToAdd + " startdate=" + message.datetime)
+              console.log("href=" + window.location.href)
               window.parent.postMessage(JSON.stringify(message), "*");
           } catch (e) {
             console.log(e.toString())
@@ -326,20 +342,22 @@ var BookingManager = function() {
              eventClick: function(info) {
                console.log('Event clicked:', JSON.stringify(info));
 
-               if (info.view.type === 'timeGridDay'
-                &&
-                   info.event.title !== "Salon hours"
-                &&
-                   info.event.title !== "Consult hours"
-                &&
-                   info.event.title !== "Salon and Consult hours"
-                ) {
-                  popupRequest({
+               if (info.view.type === 'timeGridDay') {
+                 if (info.event.extendedProps.customtype === "availability") {
+                    console.log("info.event.start=[" + info.event.start + "]")
+                    popupRequest({
+                      operation: 'showappointmentrequest',
+                      datetime: info.event.start,
+                      usermessage: "",
+                    })
+                 } else {
+                    popupRequest({
                       operation: 'changeappointmentrequest',
                       datetime: info.event.start,
                       usermessage: info.event.title,
                       event: info.event,
-                  })
+                    })
+                 }
                } else {
                     const newdate = convertDate(info.event.start)
                     console.log("newdate=[" + info.event.start + "]")
@@ -373,7 +391,7 @@ var BookingManager = function() {
                     buttonText: 'My Button',
                     type: 'timeGridDay',
                     allDaySlot: false,
-                    slotMinTime: '10:00:00',
+                    slotMinTime: '9:00:00',
                     slotDuration: '00:30:00',
                     displayEventTime: false,
                 }

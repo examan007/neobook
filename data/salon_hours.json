@@ -1,50 +1,47 @@
 [
   {
-    "title": "Salon hours",
+    "title": "Hair options",
     "startTime": "10:00:00",
     "endTime": "18:00:00",
     "display": "event",
-    "color": "#66e38e",
-    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+    "color": "rgba(102, 227, 142, 0.5)",
+    "daysOfWeek": [1, 2, 3, 4, 5, 6],
+    "customtype": "availability"
   },
   {
-    "title": "Consult hours",
+    "title": "Consult by phone",
     "startTime": "16:00:00",
     "endTime": "19:00:00",
     "display": "event",
-    "color": "#e1e366",
-    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+    "color": "rgba(225, 227, 102, 0.5)",
+    "daysOfWeek": [1, 2, 3, 4, 5, 6],
+    "customtype": "availability"
   },
   {
-    "title": "Consult hours",
-    "startTime": "12:00:00",
-    "endTime": "19:00:00",
-    "display": "event",
-    "color": "#e1e366",
-    "daysOfWeek": [0]
-  },
-  {
-    "title": "Codi hours",
-    "startTime": "10:00:00",
-    "endTime": "14:00:00",
-    "display": "event",
-    "color": "#7c5acc",
-    "daysOfWeek": [3, 4, 5, 6]
-  },
-  {
-    "title": "Jada hours",
+    "title": "Consult py phone",
     "startTime": "12:00:00",
     "endTime": "16:00:00",
     "display": "event",
-    "color": "#5a82cc",
-    "daysOfWeek": [1, 2, 3, 4]
+    "color": "rgba(225, 227, 102, 0.5)",
+    "daysOfWeek": [0],
+    "customtype": "availability"
   },
   {
-    "title": "Maryham hours",
-    "startTime": "14:00:00",
-    "endTime": "18:00:00",
+    "title": "Laser treatment",
+    "startTime": "10:00:00",
+    "endTime": "16:00:00",
     "display": "event",
-    "color": "#5ab3cc",
-    "daysOfWeek": [1, 2, 5, 6]
+    "color": "rgba(124, 90, 204, 0.5)",
+    "daysOfWeek": [4, 5, 6],
+    "customtype": "availability"
+  },
+  {
+    "title": "Other services",
+    "startTime": "9:00:00",
+    "endTime": "16:00:00",
+    "display": "event",
+    "color": "rgba(90, 130, 204, 0.5)",
+    "daysOfWeek": [1, 2, 3],
+    "customtype": "availability"
   }
 ]
