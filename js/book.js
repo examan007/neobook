@@ -348,14 +348,14 @@ var BookingManager = function(AppMan) {
                     popupRequest({
                       operation: 'showappointmentrequest',
                       datetime: info.event.start,
-                      usermessage: "",
+                      usermessage: ""
                     })
                  } else {
                     popupRequest({
                       operation: 'changeappointmentrequest',
                       datetime: info.event.start,
                       usermessage: info.event.title,
-                      event: info.event,
+                      event: info.event
                     })
                  }
                } else {
