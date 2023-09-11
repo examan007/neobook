@@ -1,15 +1,15 @@
 [
   {
-    "title": "Hair options",
-    "startTime": "10:00:00",
+    "title": "Hair Option",
+    "startTime": "10:30:00",
     "endTime": "18:00:00",
     "display": "event",
     "color": "rgba(102, 227, 142, 0.5)",
-    "daysOfWeek": [1, 2, 3, 4, 5, 6],
+    "daysOfWeek": [3, 4, 5, 6],
     "customtype": "availability"
   },
   {
-    "title": "Consult by phone",
+    "title": "Phone Consult",
     "startTime": "16:00:00",
     "endTime": "19:00:00",
     "display": "event",
@@ -18,7 +18,7 @@
     "customtype": "availability"
   },
   {
-    "title": "Consult py phone",
+    "title": "Phone Consult",
     "startTime": "12:00:00",
     "endTime": "16:00:00",
     "display": "event",
@@ -27,16 +27,16 @@
     "customtype": "availability"
   },
   {
-    "title": "Laser treatment",
+    "title": "Laser Treatment",
     "startTime": "10:00:00",
     "endTime": "16:00:00",
     "display": "event",
     "color": "rgba(124, 90, 204, 0.5)",
-    "daysOfWeek": [4, 5, 6],
+    "daysOfWeek": [3, 4, 5, 6],
     "customtype": "availability"
   },
   {
-    "title": "Other services",
+    "title": "Other service",
     "startTime": "9:00:00",
     "endTime": "16:00:00",
     "display": "event",
