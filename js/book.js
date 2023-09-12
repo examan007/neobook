@@ -291,7 +291,7 @@ var BookingManager = function(AppMan) {
                     return []
                 } else {
                     SalonData = indata
-                    return indata
+                    return [] //indata
                 }
             }
             calendar = new FullCalendar.Calendar(calendarEl, {
@@ -410,7 +410,47 @@ var BookingManager = function(AppMan) {
         Completion.setLastClickEvent(event)
         closeSidebar()
     })
-    function createEvent(data) {
+    const FilterState = {
+        current: {
+            classname: "",
+            services: ""
+        }
+    }
+    function getServiceValue(name, defval) {
+         const value = AppMan.getQueryValue(name)
+         if (value == null) {
+            if (typeof(defval) === 'undefined') {
+                return ""
+            } else {
+                return defval
+            }
+         } else {
+            return value
+         }
+    }
+    function getServicesObj() {
+        const ret = {
+            classname: "",
+            services: ""
+        }
+        try {
+            ret.classname = getServiceValue("classname", FilterState.current.classname).replace(/_/g, ' ')
+            ret.services = getServiceValue("services", FilterState.current.services).replace(/_/g, ' ')
+        } catch (e) {
+            console.log(e.stack.toString())
+        }
+        FilterState.last = FilterState.current
+        FilterState.current = ret
+    }
+    function createEvent(data, infilter) {
+      function getFilter() {
+        if (typeof(infilter) !== 'undefined') {
+            FilterState.last = FilterState.current
+            FilterState.current = infilter
+        }
+        return FilterState.current
+      }
+      const filter = getFilter()
       function getTitle() {
         try {
             if (data.request.usermessage.length > 0) {
@@ -421,6 +461,8 @@ var BookingManager = function(AppMan) {
         }
         return "Appointment booked."
       }
+      console.log("Salon hours: " + window.location.href)
+
       //var event = {
       //  title: getTitle(),
       //  start: convertDate(data.request.datetime, 0),
@@ -432,14 +474,34 @@ var BookingManager = function(AppMan) {
           event.remove();
         })
       Calendar.batchRendering(() => {
-        data.events.forEach((newevent) => {
-          console.log(JSON.stringify(newevent))
-          Calendar.addEvent(newevent);
-        })
+        if (data != null) {
+            data.events.forEach((newevent) => {
+              console.log(JSON.stringify(newevent))
+              Calendar.addEvent(newevent);
+            })
+        }
+        function testFilter (name) {
+            if (typeof(filter) === 'undefined') {
+                return false
+            } else
+            if (filter.classname.length === 0) {
+                return false
+            } else
+            if (filter.classname === "All") {
+                return true
+            } else
+            if (filter.classname === name) {
+                return true
+            }
+            return false
+        }
         SalonData.forEach((newevent) => {
-          console.log(JSON.stringify(newevent))
-          newevent.display = "event"
-          Calendar.addEvent(newevent);
+          console.log("Salon hours: " + JSON.stringify(newevent))
+          console.log("Salon hours: " + JSON.stringify(filter))
+          if (testFilter(newevent.title)) {
+              newevent.display = "event"
+              Calendar.addEvent(newevent);
+          }
         })
       });
     }
@@ -461,6 +523,10 @@ var BookingManager = function(AppMan) {
             if (jsonmsg.operation === "readappointments") {
                 console.log("reading appointments: " + message)
                 createEvent(jsonmsg.data)
+            } else
+            if (jsonmsg.operation === "filteravailable") {
+                console.log("filter: " + JSON.stringify(jsonmsg))
+                createEvent(null, jsonmsg)
             }
           } catch (e) {
             console.log(e.toString())
@@ -469,7 +535,7 @@ var BookingManager = function(AppMan) {
     }
     function registerForEvents() {
         // Add an event listener for the message event
-        window.addEventListener("message", receiveMessage, false);
+        window.addEventListener("message", receiveMessage, false)
         console.log("Adding event listener")
         $('.month-button').on("click", ()=> {
             const newdate = getMonth(CurrentDate)
@@ -617,16 +683,19 @@ var BookingManager = function(AppMan) {
     }
 
     function initializeCalendar(name, data) {
+        console.log("Initialize calendar: href = [" + window.location.href + "]")
         document.addEventListener('DOMContentLoaded', startCalendar(name, cloneCalendar, data))
     }
 
     console.log("before initialization.")
 
     function getSalonHours(name) {
+        getServicesObj()
         const LogMgr = LoginManager().getData(
             "data/salon_hours.json",
             (data)=> {
                 console.log("new data = " + JSON.stringify(data))
+                console.log("Salon hours href=[" + window.location.href + "]")
                 initializeCalendar(name, data)
             })
     }
