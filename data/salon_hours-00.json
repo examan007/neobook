@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Salon hours",
+    "startTime": "10:00:00",
+    "endTime": "16:00:00",
+    "display": "normal",
+    "color": "#66e38e",
+    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+  },
+  {
+    "title": "Salon hours",
+    "startTime": "16:00:00",
+    "endTime": "18:00:00",
+    "display": "normal",
+    "color": "#66e38e",
+    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+  },
+  {
+    "title": "Consult hours",
+    "startTime": "16:00:00",
+    "endTime": "18:00:00",
+    "display": "normal",
+    "color": "#e1e366",
+    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+  },
+  {
+    "title": "Consult hours",
+    "startTime": "18:00:00",
+    "endTime": "19:00:00",
+    "display": "normal",
+    "color": "#e1e366",
+    "daysOfWeek": [1, 2, 3, 4, 5, 6]
+  },
+  {
+    "title": "Consult hours",
+    "startTime": "10:00:00",
+    "endTime": "19:00:00",
+    "display": "normal",
+    "color": "#e1e366",
+    "daysOfWeek": [0]
+  }
+]
