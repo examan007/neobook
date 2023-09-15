@@ -1,6 +1,6 @@
 
 var BookingManager = function(AppMan) {
-    const consolex = {
+    const console = {
         log: function(msg) {}
     }
     function getParameters() {
@@ -63,7 +63,12 @@ var BookingManager = function(AppMan) {
             setLastClickEvent: function (event) {
                 LastClickEvent = event
                 testExecOrWait()
+            },
+            clearLastClick: function (event) {
+                LastClickEvent = null
+                CompletionSet = false
             }
+
        }
     }
     function closeSidebar() {
@@ -175,6 +180,7 @@ var BookingManager = function(AppMan) {
     function popupRequest(message) {
         console.log("Pop up appointment request.")
         closeSidebar()
+        Completion.clearLastClick()
         Completion.getLastClickEvent( function (event) {
             console.log("Completion: " + JSON.stringify(message))
           try {
@@ -361,6 +367,7 @@ var BookingManager = function(AppMan) {
                     })
                  }
                } else {
+                    Completion.clearLastClick()
                     const newdate = convertDate(info.event.start)
                     console.log("newdate=[" + info.event.start + "]")
                     console.log("newdate=[" + newdate + "]")
@@ -411,7 +418,7 @@ var BookingManager = function(AppMan) {
     document.getElementById("calendar").addEventListener("click", function(event) {
         const x = event.clientX;
         const y = event.clientY;
-        console.log("Clicked at position (${x}, ${y})")
+        console.log("Clicked at position (" + x + "," + y + ")")
         Completion.setLastClickEvent(event)
         closeSidebar()
     })
