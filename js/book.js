@@ -1,5 +1,5 @@
 
-var BookingManager = function() {
+var BookingManager = function(AppMan) {
     const console = {
         log: function(msg) {}
     }
@@ -27,16 +27,19 @@ var BookingManager = function() {
             return server
         }
     }
-    function getTodayDate(daystoadd) {
-        const today = new Date();
-        today.setDate(today.getDate() + daystoadd);
+    function getFormattedDate(today) {
         const date = today.getDate();
         const month = today.getMonth() + 1; // months are zero-indexed, so add 1
         const year = today.getFullYear();
 
         const todayString = `${year}-${month}-${date}`;
-        console.log(todayString); // outputs something like "4/27/2023"
+        console.log("getTodayDate = " + todayString); // outputs something like "4/27/2023"
         return todayString
+    }
+    function getTodayDate(daystoadd) {
+        const today = new Date();
+        today.setDate(today.getDate() + daystoadd);
+        return getFormattedDate(today)
     }
     var CompletionMethodObj = function (event) {
         var LastClickEvent = null
@@ -60,7 +63,12 @@ var BookingManager = function() {
             setLastClickEvent: function (event) {
                 LastClickEvent = event
                 testExecOrWait()
+            },
+            clearLastClick: function (event) {
+                LastClickEvent = null
+                CompletionSet = false
             }
+
        }
     }
     function closeSidebar() {
@@ -172,11 +180,25 @@ var BookingManager = function() {
     function popupRequest(message) {
         console.log("Pop up appointment request.")
         closeSidebar()
+        Completion.clearLastClick()
         Completion.getLastClickEvent( function (event) {
-            console.log(message.operation)
+            console.log("Completion: " + JSON.stringify(message))
           try {
               message.xpos = event.clientX
               message.ypos = event.clientY
+              console.log("Create: ypos = " + event.clientY )
+              const minutesToAddF = () => {
+                const mins = (((event.clientY - 106) / (460 - 106)) * 8 * 60)
+                return (((mins / 30) | 0) * 30)
+              }
+              console.log("datetime=[" + message.datetime + "]")
+              const minutesToAdd = minutesToAddF()
+              const eventStartTime = moment(message.datetime)
+              eventStartTime.set({ hour: 9, minute: 0, second: 0 });
+              eventStartTime.add(minutesToAdd, 'minutes')
+              message.datetime = eventStartTime.toISOString()
+              console.log("minutesToAdd=" + minutesToAdd + " startdate=" + message.datetime)
+              console.log("href=" + window.location.href)
               window.parent.postMessage(JSON.stringify(message), "*");
           } catch (e) {
             console.log(e.toString())
@@ -267,8 +289,17 @@ var BookingManager = function() {
         }
         console.log('Next/Prev button clicked; new date is [' + CurrentDate + "]");
     }
-    function startCalendar(identifier, setCalendar) {
-          const calendarEl = document.getElementById(identifier)
+    var SalonData = []
+    function startCalendar(identifier, setCalendar, indata) {
+            const calendarEl = document.getElementById(identifier)
+            const data = ()=> {
+                if (typeof(indata) === 'undefined') {
+                    return []
+                } else {
+                    SalonData = indata
+                    return [] //indata
+                }
+            }
             calendar = new FullCalendar.Calendar(calendarEl, {
             customButtons: {
               prev: {
@@ -280,22 +311,35 @@ var BookingManager = function() {
                 click: function(info) { switchDay(1) }
               }
             },
+             select: function(start, end, allDay) {
+                var check = $.fullCalendar.formatDate(start,'yyyy-MM-dd');
+                var today = $.fullCalendar.formatDate(new Date(),'yyyy-MM-dd');
+                if(check < today)
+                {
+                    console.log("Exclude day")
+                }
+                else
+                {
+                    console.log("Allow day")
+                }
+            },
+            events: data(),
             initialView: 'dayGridMonth',
+            validRange: function() {
+                return {
+                  start: getTodayDate(0),
+                  end: getTodayDate(120)
+                }
+            },
             themeSystem: 'material',
-            visibleRange: function(currentDate) {
-                // Generate a new date for manipulating in the next step
-                var startDate = new Date(currentDate.valueOf());
-                var endDate = new Date(currentDate.valueOf());
-
-                // Adjust the start & end dates, respectively
-                //startDate.setDate(startDate.getDate() - 1); // One day in the past
-                endDate.setDate(endDate.getDate() + 90); // Two days into the future
-                console.log("In visibleRange function.")
-                return { start: startDate, end: endDate };
-              },
-            contentHeight: 'auto',
+             contentHeight: 'auto',
             eventClassNames: function(arg) {
-                //console.log(JSON.stringify(arg))
+                console.log("eventClassNames = " + JSON.stringify(arg))
+                const eventDate = new Date(arg.event.end)
+                const currentDate = new Date();
+                if (eventDate < currentDate) {
+                    return [ 'hiddenevent']
+                } else
                 if (arg.view.type === 'timeGridDay') {
                     return [ 'appointment', 'confirmed' ]
                 }
@@ -303,14 +347,27 @@ var BookingManager = function() {
             },
              eventClick: function(info) {
                console.log('Event clicked:', JSON.stringify(info));
+
                if (info.view.type === 'timeGridDay') {
-                  popupRequest({
+                 if (info.event.extendedProps.customtype === "availability") {
+                    console.log("info.event.start=[" + JSON.stringify(info.event) + "]")
+                    if (true) { //info.event.title === FilterState.current.classname) {
+                        popupRequest({
+                          operation: 'showappointmentrequest',
+                          datetime: info.event.start,
+                          usermessage: info.event.title
+                        })
+                    }
+                 } else {
+                    popupRequest({
                       operation: 'changeappointmentrequest',
                       datetime: info.event.start,
                       usermessage: info.event.title,
-                      event: info.event,
-                  })
+                      event: info.event
+                    })
+                 }
                } else {
+                    Completion.clearLastClick()
                     const newdate = convertDate(info.event.start)
                     console.log("newdate=[" + info.event.start + "]")
                     console.log("newdate=[" + newdate + "]")
@@ -327,11 +384,14 @@ var BookingManager = function() {
                   setCurrentDate(Calendar, info.dateStr)
                   pushState(info.dateStr)
              } else {
+                  console.log("Time slot is not available.")
+                  /*
                   popupRequest({
                       operation: 'showappointmentrequest',
                       datetime: info.dateStr,
                       usermessage: "",
                   })
+                    */
               }
             },
               headerToolbar: {
@@ -343,7 +403,7 @@ var BookingManager = function() {
                     buttonText: 'My Button',
                     type: 'timeGridDay',
                     allDaySlot: false,
-                    slotMinTime: '10:00:00',
+                    slotMinTime: '9:00:00',
                     slotDuration: '00:30:00',
                     displayEventTime: false,
                 }
@@ -358,11 +418,51 @@ var BookingManager = function() {
     document.getElementById("calendar").addEventListener("click", function(event) {
         const x = event.clientX;
         const y = event.clientY;
-        console.log("Clicked at position (${x}, ${y})")
+        console.log("Clicked at position (" + x + "," + y + ")")
         Completion.setLastClickEvent(event)
         closeSidebar()
     })
-    function createEvent(data) {
+    const FilterState = {
+        current: {
+            classname: "",
+            services: ""
+        }
+    }
+    function getServiceValue(name, defval) {
+         const value = AppMan.getQueryValue(name)
+         if (value == null) {
+            if (typeof(defval) === 'undefined') {
+                return ""
+            } else {
+                return defval
+            }
+         } else {
+            return value
+         }
+    }
+    function getServicesObj() {
+        const ret = {
+            classname: "",
+            services: ""
+        }
+        try {
+            ret.classname = getServiceValue("classname", FilterState.current.classname).replace(/_/g, ' ')
+            ret.services = getServiceValue("services", FilterState.current.services).replace(/_/g, ' ')
+        } catch (e) {
+            console.log(e.stack.toString())
+        }
+        FilterState.last = FilterState.current
+        FilterState.current = ret
+    }
+    function createEvent(data, infilter) {
+      function getFilter() {
+        if (typeof(infilter) !== 'undefined') {
+            FilterState.last = FilterState.current
+            FilterState.current = infilter
+        }
+        return FilterState.current
+      }
+      const filter = getFilter()
       function getTitle() {
         try {
             if (data.request.usermessage.length > 0) {
@@ -373,6 +473,8 @@ var BookingManager = function() {
         }
         return "Appointment booked."
       }
+      console.log("Salon hours: " + window.location.href)
+
       //var event = {
       //  title: getTitle(),
       //  start: convertDate(data.request.datetime, 0),
@@ -382,12 +484,37 @@ var BookingManager = function() {
       //Calendar.addEvent(event);
       Calendar.getEvents().forEach(function(event) {
           event.remove();
-        });
+        })
       Calendar.batchRendering(() => {
-        data.events.forEach((newevent) => {
-          console.log(JSON.stringify(newevent))
-          Calendar.addEvent(newevent);
-        });
+        if (data != null) {
+            data.events.forEach((newevent) => {
+              console.log(JSON.stringify(newevent))
+              Calendar.addEvent(newevent);
+            })
+        }
+        function testFilter (name) {
+            if (typeof(filter) === 'undefined') {
+                return false
+            } else
+            if (filter.classname.length === 0) {
+                return false
+            } else
+            if (filter.classname === "All") {
+                return true
+            } else
+            if (filter.classname === name) {
+                return true
+            }
+            return false
+        }
+        SalonData.forEach((newevent) => {
+          console.log("Salon hours: " + JSON.stringify(newevent))
+          console.log("Salon hours: " + JSON.stringify(filter))
+          if (testFilter(newevent.title)) {
+              newevent.display = "event"
+              Calendar.addEvent(newevent);
+          }
+        })
       });
     }
 
@@ -408,6 +535,10 @@ var BookingManager = function() {
             if (jsonmsg.operation === "readappointments") {
                 console.log("reading appointments: " + message)
                 createEvent(jsonmsg.data)
+            } else
+            if (jsonmsg.operation === "filteravailable") {
+                console.log("filter: " + JSON.stringify(jsonmsg))
+                createEvent(null, jsonmsg)
             }
           } catch (e) {
             console.log(e.toString())
@@ -416,7 +547,7 @@ var BookingManager = function() {
     }
     function registerForEvents() {
         // Add an event listener for the message event
-        window.addEventListener("message", receiveMessage, false);
+        window.addEventListener("message", receiveMessage, false)
         console.log("Adding event listener")
         $('.month-button').on("click", ()=> {
             const newdate = getMonth(CurrentDate)
@@ -563,12 +694,28 @@ var BookingManager = function() {
         })
     }
 
-    function initializeCalendar() {
-        document.addEventListener('DOMContentLoaded', startCalendar('calendar', cloneCalendar))
+    function initializeCalendar(name, data) {
+        console.log("Initialize calendar: href = [" + window.location.href + "]")
+        document.addEventListener('DOMContentLoaded', startCalendar(name, cloneCalendar, data))
     }
 
-    initializeCalendar()
+    console.log("before initialization.")
 
+    function getSalonHours(name) {
+        getServicesObj()
+        const LogMgr = LoginManager().getData(
+            "data/salon_hours.json",
+            (data)=> {
+                console.log("new data = " + JSON.stringify(data))
+                console.log("Salon hours href=[" + window.location.href + "]")
+                initializeCalendar(name, data)
+            })
+    }
+    getSalonHours('calendar')
+    //window.setTimeout(getSalonHours('calendar'), 0)
+    //initializeCalendar('calendar')
+
+    console.log("Done initialization.")
 
     return {
         show: function() {
