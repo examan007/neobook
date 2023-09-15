@@ -344,12 +344,14 @@ var BookingManager = function(AppMan) {
 
                if (info.view.type === 'timeGridDay') {
                  if (info.event.extendedProps.customtype === "availability") {
-                    console.log("info.event.start=[" + info.event.start + "]")
-                    popupRequest({
-                      operation: 'showappointmentrequest',
-                      datetime: info.event.start,
-                      usermessage: ""
-                    })
+                    console.log("info.event.start=[" + JSON.stringify(info.event) + "]")
+                    if (true) { //info.event.title === FilterState.current.classname) {
+                        popupRequest({
+                          operation: 'showappointmentrequest',
+                          datetime: info.event.start,
+                          usermessage: info.event.title
+                        })
+                    }
                  } else {
                     popupRequest({
                       operation: 'changeappointmentrequest',
@@ -375,11 +377,14 @@ var BookingManager = function(AppMan) {
                   setCurrentDate(Calendar, info.dateStr)
                   pushState(info.dateStr)
              } else {
+                  console.log("Time slot is not available.")
+                  /*
                   popupRequest({
                       operation: 'showappointmentrequest',
                       datetime: info.dateStr,
                       usermessage: "",
                   })
+                    */
               }
             },
               headerToolbar: {
