@@ -36,10 +36,12 @@ var BookingManager = function(AppMan) {
         console.log("getTodayDate = " + todayString); // outputs something like "4/27/2023"
         return todayString
     }
+
+
     function getTodayDate(daystoadd) {
         const today = new Date();
-        today.setDate(today.getDate() + daystoadd);
-        return getFormattedDate(today)
+        const tomorrow = new Date(today.getTime() + (daystoadd * 24 * 60 * 60 * 1000))
+        return getFormattedDate(tomorrow)
     }
     var CompletionMethodObj = function (event) {
         var LastClickEvent = null
@@ -310,18 +312,6 @@ var BookingManager = function(AppMan) {
                 text: 'Next',
                 click: function(info) { switchDay(1) }
               }
-            },
-             select: function(start, end, allDay) {
-                var check = $.fullCalendar.formatDate(start,'yyyy-MM-dd');
-                var today = $.fullCalendar.formatDate(new Date(),'yyyy-MM-dd');
-                if(check < today)
-                {
-                    console.log("Exclude day")
-                }
-                else
-                {
-                    console.log("Allow day")
-                }
             },
             events: data(),
             initialView: 'dayGridMonth',
