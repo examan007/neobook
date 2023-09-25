@@ -91,4 +91,7 @@
 .hiddenevent {
     display: none;
 }
-
+.fc-timegrid-event-harness .fc-event-main .fc-event-main-container {
+    border: 0;
+    border-color: #ffffff;
+}

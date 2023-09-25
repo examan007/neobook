@@ -234,6 +234,9 @@ var BookingManager = function(AppMan) {
             calendar.changeView(state.currentview, dateStr);
             CurrentView = state.currentview
             CurrentDate = dateStr
+            if (CurrentView === 'dayGridMonth') {
+                removeBooked()
+            }
             console.log("CurrentDate=[" + CurrentDate + "]")
         } catch (e) {
             console.log("setCurrenDate: " + e.toString())
@@ -285,6 +288,7 @@ var BookingManager = function(AppMan) {
         if (CurrentView === 'timeGridDay') {
             setCurrentDate(Calendar, addToDate(CurrentDate, offset))
             pushState(CurrentDate)
+            resizeEvent()
         } else {
             setCurrentDate(Calendar, addToMonth(CurrentDate, offset))
             pushState(CurrentDate)
@@ -409,6 +413,7 @@ var BookingManager = function(AppMan) {
          setCalendar(calendar)
 
           calendar.render()
+
    }
 
     document.getElementById("calendar").addEventListener("click", function(event) {
@@ -520,32 +525,70 @@ var BookingManager = function(AppMan) {
         })
       });
       resizeEvent()
+
     }
 
     function findParentWithClass(element, className) {
-        while (element && !element.classList.contains(className)) {
-            element = element.parentNode;
+        while (element) {
+           if (typeof(element.classList) === 'undefined') {
+                element = element.parentNode
+           } else
+           if (!element.classList.contains(className)) {
+                element = element.parentNode;
+            } else {
+                break
+            }
         }
         return element;
+    }
+
+    function removeBooked() {
+        const elements = document.querySelectorAll(".fc-event-title")
+        console.log("remove: ")
+        elements.forEach((element)=> {
+            console.log("remove: " + element.textContent + " height: " + $(element).height())
+            if (element.textContent === "Booked") {
+                const harnessElement = findParentWithClass(element, "fc-daygrid-event-harness")
+                if (harnessElement) {
+                    harnessElement.setAttribute("style", "display: none;")
+                }
+            }
+        })
     }
 
     function resizeEvent() {
         const elements = document.querySelectorAll(".fc-event-title")
         elements.forEach((element)=> {
-            console.log("element: " + element.textContent)
-            if (element.textContent === "Booked") {
+            console.log("element: " + element.textContent + " height: " + $(element).height())
+            const harnessElement = findParentWithClass(element, "fc-timegrid-event-harness");
+            function getHeight() {
+                if (harnessElement) {
+                    const height = $(harnessElement).height()
+                    console.log("harness element: " + height)
+                    return height
+                }
+                return 100
+            }
+            if (getHeight() < 50) {
                 console.log("element: " + element.outerHTML)
                 //element.textContent = ""
-                element.setAttribute("style", "background-color: #FFFFFF; color: #FFFFFF;")
-                console.log("element: width=" + $(element).width())
-                const harnessElement = findParentWithClass(element, "fc-timegrid-event-harness");
+                if (element.textContent === "Booked") {
+                    element.setAttribute("style",
+                     "background-color: #FFFFFF; color: #FFFFFF;")
+                }
                 if (harnessElement) {
                     var styleValue = harnessElement.getAttribute("style")
                     console.log("Found element:", harnessElement);
                     console.log("harness element: " + styleValue)
                     var valuesArray = styleValue.split(/\s+/);
-                    //valuesArray[3] = (parseInt(valuesArray[3]) + 20) + "px"
-                    valuesArray[4] = "0%;"
+                    if (valuesArray.length > 6) {
+                        //valuesArray[3] = (parseInt(valuesArray[3]) + 20) + "px"
+                        valuesArray[4] = "0%;"
+                        if (valuesArray.length < 9) {
+                            valuesArray.push("border-color")
+                            valuesArray.push("#FFFFFF;")
+                        }
+                    }
                     var valueStr = valuesArray.toString().replace(/,/g, " ")
                     console.log("element: [" + valueStr + "]")
                     harnessElement.setAttribute("style", valueStr)
@@ -554,6 +597,7 @@ var BookingManager = function(AppMan) {
                 }
             }
         })
+        removeBooked()
     }
 
     function receiveMessage(event) {
