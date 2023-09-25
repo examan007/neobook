@@ -1,6 +1,6 @@
 
 var BookingManager = function(AppMan) {
-    const console = {
+    const consolex = {
         log: function(msg) {}
     }
     function getParameters() {
@@ -292,6 +292,7 @@ var BookingManager = function(AppMan) {
         console.log('Next/Prev button clicked; new date is [' + CurrentDate + "]");
     }
     var SalonData = []
+    var LastData = null
     function startCalendar(identifier, setCalendar, indata) {
             const calendarEl = document.getElementById(identifier)
             const data = ()=> {
@@ -364,6 +365,7 @@ var BookingManager = function(AppMan) {
                     const dateonly = newdate.split('T')[0]
                     setCurrentDate(Calendar, dateonly)
                     pushState(dateonly)
+                    resizeEvent()
                }
              },
              dateClick: function(info) {
@@ -373,6 +375,7 @@ var BookingManager = function(AppMan) {
              if (info.view.type !== 'timeGridDay') {
                   setCurrentDate(Calendar, info.dateStr)
                   pushState(info.dateStr)
+                  resizeEvent()
              } else {
                   console.log("Time slot is not available.")
                   /*
@@ -398,7 +401,10 @@ var BookingManager = function(AppMan) {
                     displayEventTime: false,
                 }
             },
-           })
+            eventDidMount: function(info) {
+                //console.log("Event: " + JSON.stringify(info))
+            }
+         })
 
          setCalendar(calendar)
 
@@ -477,7 +483,14 @@ var BookingManager = function(AppMan) {
         })
       Calendar.batchRendering(() => {
         if (data != null) {
+            LastData = data
             data.events.forEach((newevent) => {
+              console.log(JSON.stringify(newevent))
+              Calendar.addEvent(newevent);
+            })
+        } else
+        if (LastData != null) {
+            LastData.events.forEach((newevent) => {
               console.log(JSON.stringify(newevent))
               Calendar.addEvent(newevent);
             })
@@ -506,6 +519,41 @@ var BookingManager = function(AppMan) {
           }
         })
       });
+      resizeEvent()
+    }
+
+    function findParentWithClass(element, className) {
+        while (element && !element.classList.contains(className)) {
+            element = element.parentNode;
+        }
+        return element;
+    }
+
+    function resizeEvent() {
+        const elements = document.querySelectorAll(".fc-event-title")
+        elements.forEach((element)=> {
+            console.log("element: " + element.textContent)
+            if (element.textContent === "Booked") {
+                console.log("element: " + element.outerHTML)
+                //element.textContent = ""
+                element.setAttribute("style", "background-color: #FFFFFF; color: #FFFFFF;")
+                console.log("element: width=" + $(element).width())
+                const harnessElement = findParentWithClass(element, "fc-timegrid-event-harness");
+                if (harnessElement) {
+                    var styleValue = harnessElement.getAttribute("style")
+                    console.log("Found element:", harnessElement);
+                    console.log("harness element: " + styleValue)
+                    var valuesArray = styleValue.split(/\s+/);
+                    //valuesArray[3] = (parseInt(valuesArray[3]) + 20) + "px"
+                    valuesArray[4] = "0%;"
+                    var valueStr = valuesArray.toString().replace(/,/g, " ")
+                    console.log("element: [" + valueStr + "]")
+                    harnessElement.setAttribute("style", valueStr)
+                } else {
+                    console.log("Element not found.");
+                }
+            }
+        })
     }
 
     function receiveMessage(event) {
@@ -523,8 +571,10 @@ var BookingManager = function(AppMan) {
                 createEvent(jsonmsg.data)
             } else
             if (jsonmsg.operation === "readappointments") {
-                console.log("reading appointments: " + message)
+                console.log("reading " + jsonmsg.data.request.username + " appointments: " + message)
                 createEvent(jsonmsg.data)
+                window.setTimeout(resizeEvent, 1000)
+                //resizeEvent()
             } else
             if (jsonmsg.operation === "filteravailable") {
                 console.log("filter: " + JSON.stringify(jsonmsg))
