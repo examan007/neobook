@@ -191,7 +191,7 @@ var BookingManager = function(AppMan) {
               console.log("Create: ypos = " + event.clientY )
               const minutesToAddF = () => {
                 const mins = (((event.clientY - 106) / (460 - 106)) * 8 * 60)
-                return (((mins / 30) | 0) * 30)
+                return (((mins / 30) | 0) * 30) - 30
               }
               console.log("datetime=[" + message.datetime + "]")
               const minutesToAdd = minutesToAddF()
