@@ -191,7 +191,7 @@ var BookingManager = function(AppMan) {
               console.log("Create: ypos = " + event.clientY )
               const minutesToAddF = () => {
                 const mins = (((event.clientY - 106) / (460 - 106)) * 8 * 60)
-                return (((mins / 30) | 0) * 30) - 30
+                return (((mins / 30) | 0) * 30) // - 30
               }
               console.log("datetime=[" + message.datetime + "]")
               const minutesToAdd = minutesToAddF()
@@ -297,6 +297,7 @@ var BookingManager = function(AppMan) {
     }
     var SalonData = []
     var LastData = null
+    var MyData = null
     function startCalendar(identifier, setCalendar, indata) {
             const calendarEl = document.getElementById(identifier)
             const data = ()=> {
@@ -488,14 +489,22 @@ var BookingManager = function(AppMan) {
         })
       Calendar.batchRendering(() => {
         if (data != null) {
-            LastData = data
-            data.events.forEach((newevent) => {
+            if (data.authentication === true) {
+                console.log("auth: true")
+                MyData = data
+            } else {
+                LastData = data
+            }
+
+        }
+        if (LastData != null) {
+            LastData.events.forEach((newevent) => {
               console.log(JSON.stringify(newevent))
               Calendar.addEvent(newevent);
             })
-        } else
-        if (LastData != null) {
-            LastData.events.forEach((newevent) => {
+        }
+        if (MyData != null) {
+            MyData.events.forEach((newevent) => {
               console.log(JSON.stringify(newevent))
               Calendar.addEvent(newevent);
             })
