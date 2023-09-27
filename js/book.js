@@ -191,7 +191,7 @@ var BookingManager = function(AppMan) {
               console.log("Create: ypos = " + event.clientY )
               const minutesToAddF = () => {
                 const mins = (((event.clientY - 106) / (460 - 106)) * 8 * 60)
-                return (((mins / 30) | 0) * 30)
+                return (((mins / 30) | 0) * 30) // - 30
               }
               console.log("datetime=[" + message.datetime + "]")
               const minutesToAdd = minutesToAddF()
@@ -234,6 +234,9 @@ var BookingManager = function(AppMan) {
             calendar.changeView(state.currentview, dateStr);
             CurrentView = state.currentview
             CurrentDate = dateStr
+            if (CurrentView === 'dayGridMonth') {
+                removeBooked()
+            }
             console.log("CurrentDate=[" + CurrentDate + "]")
         } catch (e) {
             console.log("setCurrenDate: " + e.toString())
@@ -285,6 +288,7 @@ var BookingManager = function(AppMan) {
         if (CurrentView === 'timeGridDay') {
             setCurrentDate(Calendar, addToDate(CurrentDate, offset))
             pushState(CurrentDate)
+            resizeEvent()
         } else {
             setCurrentDate(Calendar, addToMonth(CurrentDate, offset))
             pushState(CurrentDate)
@@ -292,6 +296,8 @@ var BookingManager = function(AppMan) {
         console.log('Next/Prev button clicked; new date is [' + CurrentDate + "]");
     }
     var SalonData = []
+    var LastData = null
+    var MyData = null
     function startCalendar(identifier, setCalendar, indata) {
             const calendarEl = document.getElementById(identifier)
             const data = ()=> {
@@ -364,6 +370,7 @@ var BookingManager = function(AppMan) {
                     const dateonly = newdate.split('T')[0]
                     setCurrentDate(Calendar, dateonly)
                     pushState(dateonly)
+                    resizeEvent()
                }
              },
              dateClick: function(info) {
@@ -373,6 +380,7 @@ var BookingManager = function(AppMan) {
              if (info.view.type !== 'timeGridDay') {
                   setCurrentDate(Calendar, info.dateStr)
                   pushState(info.dateStr)
+                  resizeEvent()
              } else {
                   console.log("Time slot is not available.")
                   /*
@@ -398,11 +406,15 @@ var BookingManager = function(AppMan) {
                     displayEventTime: false,
                 }
             },
-           })
+            eventDidMount: function(info) {
+                //console.log("Event: " + JSON.stringify(info))
+            }
+         })
 
          setCalendar(calendar)
 
           calendar.render()
+
    }
 
     document.getElementById("calendar").addEventListener("click", function(event) {
@@ -477,7 +489,22 @@ var BookingManager = function(AppMan) {
         })
       Calendar.batchRendering(() => {
         if (data != null) {
-            data.events.forEach((newevent) => {
+            if (data.authentication === true) {
+                console.log("auth: true")
+                MyData = data
+            } else {
+                LastData = data
+            }
+
+        }
+        if (LastData != null) {
+            LastData.events.forEach((newevent) => {
+              console.log(JSON.stringify(newevent))
+              Calendar.addEvent(newevent);
+            })
+        }
+        if (MyData != null) {
+            MyData.events.forEach((newevent) => {
               console.log(JSON.stringify(newevent))
               Calendar.addEvent(newevent);
             })
@@ -506,6 +533,80 @@ var BookingManager = function(AppMan) {
           }
         })
       });
+      resizeEvent()
+
+    }
+
+    function findParentWithClass(element, className) {
+        while (element) {
+           if (typeof(element.classList) === 'undefined') {
+                element = element.parentNode
+           } else
+           if (!element.classList.contains(className)) {
+                element = element.parentNode;
+            } else {
+                break
+            }
+        }
+        return element;
+    }
+
+    function removeBooked() {
+        const elements = document.querySelectorAll(".fc-event-title")
+        console.log("remove: ")
+        elements.forEach((element)=> {
+            console.log("remove: " + element.textContent + " height: " + $(element).height())
+            if (element.textContent === "Booked") {
+                const harnessElement = findParentWithClass(element, "fc-daygrid-event-harness")
+                if (harnessElement) {
+                    harnessElement.setAttribute("style", "display: none;")
+                }
+            }
+        })
+    }
+
+    function resizeEvent() {
+        const elements = document.querySelectorAll(".fc-event-title")
+        elements.forEach((element)=> {
+            console.log("element: " + element.textContent + " height: " + $(element).height())
+            const harnessElement = findParentWithClass(element, "fc-timegrid-event-harness");
+            function getHeight() {
+                if (harnessElement) {
+                    const height = $(harnessElement).height()
+                    console.log("harness element: " + height)
+                    return height
+                }
+                return 100
+            }
+            if (getHeight() < 50) {
+                console.log("element: " + element.outerHTML)
+                //element.textContent = ""
+                if (element.textContent === "Booked") {
+                    element.setAttribute("style",
+                     "background-color: #FFFFFF; color: #FFFFFF;")
+                }
+                if (harnessElement) {
+                    var styleValue = harnessElement.getAttribute("style")
+                    console.log("Found element:", harnessElement);
+                    console.log("harness element: " + styleValue)
+                    var valuesArray = styleValue.split(/\s+/);
+                    if (valuesArray.length > 6) {
+                        //valuesArray[3] = (parseInt(valuesArray[3]) + 20) + "px"
+                        valuesArray[4] = "0%;"
+                        if (valuesArray.length < 9) {
+                            valuesArray.push("border-color")
+                            valuesArray.push("#FFFFFF;")
+                        }
+                    }
+                    var valueStr = valuesArray.toString().replace(/,/g, " ")
+                    console.log("element: [" + valueStr + "]")
+                    harnessElement.setAttribute("style", valueStr)
+                } else {
+                    console.log("Element not found.");
+                }
+            }
+        })
+        removeBooked()
     }
 
     function receiveMessage(event) {
@@ -523,8 +624,10 @@ var BookingManager = function(AppMan) {
                 createEvent(jsonmsg.data)
             } else
             if (jsonmsg.operation === "readappointments") {
-                console.log("reading appointments: " + message)
+                console.log("reading " + jsonmsg.data.request.username + " appointments: " + message)
                 createEvent(jsonmsg.data)
+                window.setTimeout(resizeEvent, 1000)
+                //resizeEvent()
             } else
             if (jsonmsg.operation === "filteravailable") {
                 console.log("filter: " + JSON.stringify(jsonmsg))
