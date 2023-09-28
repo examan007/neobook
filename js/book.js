@@ -1,6 +1,6 @@
 
 var BookingManager = function(AppMan) {
-    const console = {
+    const consolex = {
         log: function(msg) {}
     }
     function getParameters() {
@@ -497,18 +497,6 @@ var BookingManager = function(AppMan) {
             }
 
         }
-        if (LastData != null) {
-            LastData.events.forEach((newevent) => {
-              console.log(JSON.stringify(newevent))
-              Calendar.addEvent(newevent);
-            })
-        }
-        if (MyData != null) {
-            MyData.events.forEach((newevent) => {
-              console.log(JSON.stringify(newevent))
-              Calendar.addEvent(newevent);
-            })
-        }
         function testFilter (name) {
             if (typeof(filter) === 'undefined') {
                 return false
@@ -532,9 +520,20 @@ var BookingManager = function(AppMan) {
               Calendar.addEvent(newevent);
           }
         })
+        if (LastData != null) {
+            LastData.events.forEach((newevent) => {
+              console.log(JSON.stringify(newevent))
+              Calendar.addEvent(newevent);
+            })
+        }
+        if (MyData != null) {
+            MyData.events.forEach((newevent) => {
+              console.log(JSON.stringify(newevent))
+              Calendar.addEvent(newevent);
+            })
+        }
       });
       resizeEvent()
-
     }
 
     function findParentWithClass(element, className) {
@@ -597,6 +596,10 @@ var BookingManager = function(AppMan) {
                             valuesArray.push("border-color")
                             valuesArray.push("#FFFFFF;")
                         }
+                        valuesArray[6] = "100;"
+                    } else
+                    if (valuesArray.length  == 6) {
+                        valuesArray[5] = "100;"
                     }
                     var valueStr = valuesArray.toString().replace(/,/g, " ")
                     console.log("element: [" + valueStr + "]")
