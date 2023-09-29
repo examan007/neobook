@@ -412,8 +412,7 @@ var BookingManager = function(AppMan) {
          })
 
          setCalendar(calendar)
-
-          calendar.render()
+         calendar.render()
 
    }
 
@@ -532,9 +531,8 @@ var BookingManager = function(AppMan) {
               Calendar.addEvent(newevent);
           }
         })
-      });
+      })
       resizeEvent()
-
     }
 
     function findParentWithClass(element, className) {
@@ -590,16 +588,54 @@ var BookingManager = function(AppMan) {
                     console.log("Found element:", harnessElement);
                     console.log("harness element: " + styleValue)
                     var valuesArray = styleValue.split(/\s+/);
-                    if (valuesArray.length > 6) {
-                        //valuesArray[3] = (parseInt(valuesArray[3]) + 20) + "px"
-                        valuesArray[4] = "0%;"
-                        if (valuesArray.length < 9) {
-                            valuesArray.push("border-color")
-                            valuesArray.push("#FFFFFF;")
+                    function getIndex(index, name) {
+                        if (index >= valuesArray.length) {
+                            return -1
+                        } else
+                        if (valuesArray[index] === name) {
+                            return index
+                        } else {
+                            return getIndex(index + 1, name)
                         }
                     }
+                    function setAttrValue(name, setmethod, addmethod) {
+                        const index = getIndex(0, name)
+                        if (index >= 0) {
+                            setmethod(index)
+                        } else
+                        if (typeof(addmethod) !== 'undefined') {
+                            addmethod(index, name)
+                        }
+                    }
+                    setAttrValue("inset:", (index)=> {
+                        if (valuesArray[index + 5] === "z-index:") {
+                            valuesArray[index + 4] = "0%;"
+                        }
+                        if (valuesArray[index + 2] === "40%") {
+                            valuesArray[index + 4] = "0%;"
+                        }
+                    })
+                    setAttrValue("z-index:", (index)=> {
+                        if (element.textContent === "Booked") {
+                            valuesArray[index + 1] = "50;"
+                        } else {
+                            valuesArray[index + 1] = "100;"
+                        }
+                    })
+                    setAttrValue("border-color:",
+                     (index)=> {
+                        if (element.textContent === "Booked") {
+                            valuesArray[insetindex + 1] = "#FFFFFF;"
+                        }
+                    },
+                     (index, name)=> {
+                        if (element.textContent === "Booked") {
+                            valuesArray.push(name)
+                            valuesArray.push("#FFFFFF;")
+                        }
+                    })
                     var valueStr = valuesArray.toString().replace(/,/g, " ")
-                    console.log("element: [" + valueStr + "]")
+                    console.log("new harness element: [" + valueStr + "]")
                     harnessElement.setAttribute("style", valueStr)
                 } else {
                     console.log("Element not found.");
@@ -626,8 +662,6 @@ var BookingManager = function(AppMan) {
             if (jsonmsg.operation === "readappointments") {
                 console.log("reading " + jsonmsg.data.request.username + " appointments: " + message)
                 createEvent(jsonmsg.data)
-                window.setTimeout(resizeEvent, 1000)
-                //resizeEvent()
             } else
             if (jsonmsg.operation === "filteravailable") {
                 console.log("filter: " + JSON.stringify(jsonmsg))
