@@ -298,6 +298,7 @@ var BookingManager = function(AppMan) {
     var SalonData = []
     var LastData = null
     var MyData = null
+    var UpdateTimer = null
     function startCalendar(identifier, setCalendar, indata) {
             const calendarEl = document.getElementById(identifier)
             const data = ()=> {
@@ -456,14 +457,6 @@ var BookingManager = function(AppMan) {
         FilterState.current = ret
     }
     function createEvent(data, infilter) {
-      function getFilter() {
-        if (typeof(infilter) !== 'undefined') {
-            FilterState.last = FilterState.current
-            FilterState.current = infilter
-        }
-        return FilterState.current
-      }
-      const filter = getFilter()
       function getTitle() {
         try {
             if (data.request.usermessage.length > 0) {
@@ -475,18 +468,6 @@ var BookingManager = function(AppMan) {
         return "Appointment booked."
       }
       console.log("Salon hours: " + window.location.href)
-
-      //var event = {
-      //  title: getTitle(),
-      //  start: convertDate(data.request.datetime, 0),
-      //  end: convertDate(data.request.datetime, 30)
-      //}
-      //console.log(JSON.stringify(event))
-      //Calendar.addEvent(event);
-      Calendar.getEvents().forEach(function(event) {
-          event.remove();
-        })
-      Calendar.batchRendering(() => {
         if (data != null) {
             if (data.authentication === true) {
                 console.log("auth: true")
@@ -496,6 +477,18 @@ var BookingManager = function(AppMan) {
             }
 
         }
+        if (UpdateTimer != null) {
+            window.clearTimeout(UpdateTimer)
+        }
+        UpdateTimer = window.setTimeout(()=> {
+             updateEvents(infilter)
+        }, 1000)
+    }
+    function updateEvents(infilter) {
+      Calendar.getEvents().forEach(function(event) {
+          event.remove();
+        })
+      Calendar.batchRendering(() => {
         if (LastData != null) {
             LastData.events.forEach((newevent) => {
               console.log(JSON.stringify(newevent))
@@ -508,6 +501,14 @@ var BookingManager = function(AppMan) {
               Calendar.addEvent(newevent);
             })
         }
+        function getFilter() {
+        if (typeof(infilter) !== 'undefined') {
+            FilterState.last = FilterState.current
+            FilterState.current = infilter
+        }
+        return FilterState.current
+        }
+        const filter = getFilter()
         function testFilter (name) {
             if (typeof(filter) === 'undefined') {
                 return false
@@ -551,12 +552,12 @@ var BookingManager = function(AppMan) {
 
     function removeBooked() {
         const elements = document.querySelectorAll(".fc-event-title")
-        console.log("remove: ")
+        console.log("hide: ")
         elements.forEach((element)=> {
-            console.log("remove: " + element.textContent + " height: " + $(element).height())
             if (element.textContent === "Booked") {
                 const harnessElement = findParentWithClass(element, "fc-daygrid-event-harness")
                 if (harnessElement) {
+                    console.log("hide: " + element.outerHTML + " height: " + $(element).height())
                     harnessElement.setAttribute("style", "display: none;")
                 }
             }
@@ -566,7 +567,7 @@ var BookingManager = function(AppMan) {
     function resizeEvent() {
         const elements = document.querySelectorAll(".fc-event-title")
         elements.forEach((element)=> {
-            console.log("element: " + element.textContent + " height: " + $(element).height())
+            //console.log("element: " + element.textContent + " height: " + $(element).height())
             const harnessElement = findParentWithClass(element, "fc-timegrid-event-harness");
             function getHeight() {
                 if (harnessElement) {
@@ -645,6 +646,8 @@ var BookingManager = function(AppMan) {
         removeBooked()
     }
 
+    const StartupMessages = []
+
     function receiveMessage(event) {
       // Check if the message is coming from the expected origin
       console.log("rec mess")
@@ -661,14 +664,18 @@ var BookingManager = function(AppMan) {
             } else
             if (jsonmsg.operation === "readappointments") {
                 console.log("reading " + jsonmsg.data.request.username + " appointments: " + message)
-                createEvent(jsonmsg.data)
+                if (Calendar === null) {
+                    StartupMessages.push(jsonmsg.data)
+                } else {
+                    createEvent(jsonmsg.data)
+                }
             } else
             if (jsonmsg.operation === "filteravailable") {
                 console.log("filter: " + JSON.stringify(jsonmsg))
                 createEvent(null, jsonmsg)
             }
           } catch (e) {
-            console.log(e.toString())
+            console.log(e.stack.toString())
           }
        }
     }
@@ -795,6 +802,10 @@ var BookingManager = function(AppMan) {
 
     function cloneCalendar(calendar) {
         Calendar = calendar
+        while (StartupMessages.length > 0) {
+            const data = StartupMessages.shift()
+            createEvent(data)
+        }
          if (date != null) {
               setCurrentDate(calendar, date)
               //pushState(CurrentDate)
