@@ -683,6 +683,17 @@ var BookingManager = function(AppMan) {
         // Add an event listener for the message event
         window.addEventListener("message", receiveMessage, false)
         console.log("Adding event listener")
+        window.addEventListener("load", function() {
+            console.log("neoOnload Book page load complete.")
+            var message = {
+               operation: "bookpageloaded"
+            }
+            try {
+               window.parent.postMessage(JSON.stringify(message), "*")
+            } catch (e) {
+                console.log("Done " + e.toString())
+            }
+        })
         $('.month-button').on("click", ()=> {
             const newdate = getMonth(CurrentDate)
             setCurrentDate(Calendar, newdate)
@@ -852,6 +863,7 @@ var BookingManager = function(AppMan) {
     getSalonHours('calendar')
     //window.setTimeout(getSalonHours('calendar'), 0)
     //initializeCalendar('calendar')
+
 
     console.log("Done initialization.")
 
