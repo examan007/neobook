@@ -160,6 +160,20 @@ var BookingManager = function(AppMan) {
         const newdate = getNewDate()
         paramsobj.delete(attrname)
         paramsobj.append(attrname, newdate)
+        function testAndGet(name) {
+            const record = paramsobj.get(name)
+            if (record) {
+                console.log("newhref: attr=", record)
+                const test = record.split("#")
+                console.log("newhref: ", test)
+                if (test[1] === "Booking") {
+                    paramsobj.delete(name)
+                    paramsobj.append(name, test[0])
+                }
+            }
+        }
+        testAndGet("services")
+        testAndGet("classname")
         const params = paramsobj.toString()
         if (typeof(params) === 'undefined') {
             return "?" + attrname + "=" + newdate
