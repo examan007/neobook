@@ -357,8 +357,6 @@ var BookingManager = function(AppMan) {
                 return []
             },
              eventClick: function(info) {
-               console.log('Event clicked:', JSON.stringify(info));
-
                if (info.view.type === 'timeGridDay') {
                  if (info.event.extendedProps.customtype === "availability") {
                     console.log("info.event.start=[" + JSON.stringify(info.event) + "]")
