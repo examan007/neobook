@@ -2,7 +2,7 @@
   {
     "title": "Hair Care Option",
     "startTime": "11:00:00",
-    "endTime": "18:00:00",
+    "endTime": "18:30:00",
     "display": "event",
     "color": "rgba(102, 227, 142, 0.5)",
     "daysOfWeek": [3, 4, 5, 6],
@@ -10,8 +10,8 @@
   },
   {
     "title": "Phone Consult",
-    "startTime": "16:00:00",
-    "endTime": "20:00:00",
+    "startTime": "12:00:00",
+    "endTime": "19:00:00",
     "display": "event",
     "color": "rgba(225, 227, 102, 0.5)",
     "daysOfWeek": [1, 2, 3, 4, 5, 6],
@@ -19,8 +19,8 @@
   },
   {
     "title": "Phone Consult",
-    "startTime": "12:00:00",
-    "endTime": "16:00:00",
+    "startTime": "14:00:00",
+    "endTime": "19:00:00",
     "display": "event",
     "color": "rgba(225, 227, 102, 0.5)",
     "daysOfWeek": [0],
@@ -29,7 +29,7 @@
   {
     "title": "Laser Treatment",
     "startTime": "10:00:00",
-    "endTime": "18:00:00",
+    "endTime": "18:30:00",
     "display": "event",
     "color": "rgba(124, 90, 204, 0.5)",
     "daysOfWeek": [1, 2, 3, 4, 5, 6],
@@ -38,10 +38,10 @@
   {
     "title": "Other Service",
     "startTime": "9:00:00",
-    "endTime": "16:00:00",
+    "endTime": "18:00:00",
     "display": "event",
     "color": "rgba(90, 130, 204, 0.5)",
-    "daysOfWeek": [1, 2, 3],
+    "daysOfWeek": [1, 2, 3, 4, 5, 6],
     "customtype": "availability"
   }
 ]
