@@ -589,7 +589,7 @@ var BookingManager = function(AppMan) {
                 }
                 return 100
             }
-            if (getHeight() < 50) {
+            if (getHeight() < 100) {
                 console.log("element: " + element.outerHTML)
                 //element.textContent = ""
                 if (element.textContent === "Booked") {
@@ -862,6 +862,17 @@ var BookingManager = function(AppMan) {
 
     console.log("before initialization.")
 
+    function sendSalonHours(salondata) {
+        const message = {
+            operation: 'salonhours',
+            data: salondata
+        }
+        try {
+            window.parent.postMessage(JSON.stringify(message), "*");
+        } catch (e) {
+            console.log(e.toString())
+        }
+    }
     function getSalonHours(name) {
         getServicesObj()
         const LogMgr = LoginManager().getData(
@@ -870,6 +881,7 @@ var BookingManager = function(AppMan) {
                 console.log("new data = " + JSON.stringify(data))
                 console.log("Salon hours href=[" + window.location.href + "]")
                 initializeCalendar(name, data)
+                sendSalonHours(data)
             })
     }
     getSalonHours('calendar')
