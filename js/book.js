@@ -211,7 +211,7 @@ var BookingManager = function(AppMan) {
     function popupRequest(message) {
         console.log("Pop up appointment request.")
         closeSidebar()
-        Completion.clearLastClick()
+        //Completion.clearLastClick()
         Completion.getLastClickEvent( function (event) {
             console.log("Completion: " + JSON.stringify(message))
           try {
