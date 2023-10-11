@@ -208,10 +208,12 @@ var BookingManager = function(AppMan) {
             sendURLTOParent(params)
         }
     }
-    function popupRequest(message) {
+    function popupRequest(message, flag) {
         console.log("Pop up appointment request.")
         closeSidebar()
-        //Completion.clearLastClick()
+        if (typeof(flag) === 'undefined') {
+            Completion.clearLastClick()
+        }
         Completion.getLastClickEvent( function (event) {
             console.log("Completion: " + JSON.stringify(message))
           try {
@@ -433,7 +435,7 @@ var BookingManager = function(AppMan) {
                           operation: 'showappointmentrequest',
                           datetime: info.dateStr,
                           usermessage: "",
-                      })
+                      }, true)
                   }
               }
             },
