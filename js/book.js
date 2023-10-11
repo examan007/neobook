@@ -363,6 +363,9 @@ var BookingManager = function(AppMan) {
                     if (eventDate < currentDate) {
                         return [ 'hiddenevent']
                     } else
+                    if (arg.event.title === "Booked") {
+                        return [ 'booked' ]
+                    } else
                     if (arg.view.type === 'timeGridDay') {
                         return [ 'appointment', 'confirmed' ]
                     }
@@ -613,7 +616,7 @@ var BookingManager = function(AppMan) {
             }
             if (element.textContent === "Booked") {
                     element.setAttribute("style",
-                     "background-color: #FFFFFF; color: #FFFFFF;")
+                     "background-color: rgba(255, 255, 255, 0); color: rgba(255, 255, 255, 0);")
             }
             if ( harnessElement && ! isAvailability()) {
                     var styleValue = harnessElement.getAttribute("style")
@@ -649,18 +652,6 @@ var BookingManager = function(AppMan) {
                             valuesArray[index + 1] = "50;"
                         } else {
                             valuesArray[index + 1] = "100;"
-                        }
-                    })
-                    setAttrValue("border-color:",
-                     (index)=> {
-                        if (element.textContent === "Booked") {
-                            valuesArray[insetindex + 1] = "#FFFFFF;"
-                        }
-                    },
-                     (index, name)=> {
-                        if (element.textContent === "Booked") {
-                            valuesArray.push(name)
-                            valuesArray.push("#FFFFFF;")
                         }
                     })
                     setAttrValue("width:",
