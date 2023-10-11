@@ -37,7 +37,7 @@
   },
   {
     "title": "Other Service",
-    "startTime": "9:00:00",
+    "startTime": "09:00:00",
     "endTime": "18:00:00",
     "display": "event",
     "color": "rgba(90, 130, 204, 0.5)",
