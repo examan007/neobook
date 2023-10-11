@@ -3,6 +3,21 @@ var BookingManager = function(AppMan) {
     const console = {
         log: function(msg) {}
     }
+    function isAdminUser() {
+        try {
+            if (MyData != null
+                &&
+                LastData != null
+                &&
+                MyData.events.length == LastData.events.length
+                ) {
+                return true
+            }
+        } catch (e) {
+            console.log("Is admin: " + e.toSting())
+        }
+        return false
+    }
     function getParameters() {
         const params = window.location.href.split("?")[1]
         if (typeof(params) === 'undefined') {
@@ -412,14 +427,14 @@ var BookingManager = function(AppMan) {
                   pushState(info.dateStr)
                   resizeEvent()
              } else {
-                  console.log("Time slot is not available.")
-                  /*
-                  popupRequest({
-                      operation: 'showappointmentrequest',
-                      datetime: info.dateStr,
-                      usermessage: "",
-                  })
-                    */
+                  console.log("Time slot is available administrative only.")
+                  if (isAdminUser()) {
+                      popupRequest({
+                          operation: 'showappointmentrequest',
+                          datetime: info.dateStr,
+                          usermessage: "",
+                      })
+                  }
               }
             },
               headerToolbar: {
