@@ -348,13 +348,27 @@ var BookingManager = function(AppMan) {
                 console.log("eventClassNames = " + JSON.stringify(arg))
                 const eventDate = new Date(arg.event.end)
                 const currentDate = new Date();
-                if (eventDate < currentDate) {
-                    return [ 'hiddenevent']
-                } else
-                if (arg.view.type === 'timeGridDay') {
-                    return [ 'appointment', 'confirmed' ]
+                function getAvailability() {
+                    const customtype = arg.event.extendedProps.customtype
+                    if (typeof(customtype) === 'undefined') {
+                        return []
+                    } else
+                    if (customtype === "availability") {
+                        return ["availability"]
+                    } else {
+                        return []
+                    }
                 }
-                return []
+                function getClasses() {
+                    if (eventDate < currentDate) {
+                        return [ 'hiddenevent']
+                    } else
+                    if (arg.view.type === 'timeGridDay') {
+                        return [ 'appointment', 'confirmed' ]
+                    }
+                    return []
+                }
+                return [...getClasses(), ...getAvailability()]
             },
              eventClick: function(info) {
                if (info.view.type === 'timeGridDay') {
@@ -589,16 +603,21 @@ var BookingManager = function(AppMan) {
                 }
                 return 100
             }
-            if (getHeight() < 100) {
-                console.log("element: " + element.outerHTML)
-                //element.textContent = ""
-                if (element.textContent === "Booked") {
+            function isAvailability() {
+                const element = harnessElement.querySelector('.availability')
+                if (element) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+            if (element.textContent === "Booked") {
                     element.setAttribute("style",
                      "background-color: #FFFFFF; color: #FFFFFF;")
-                }
-                if (harnessElement) {
+            }
+            if ( harnessElement && ! isAvailability()) {
                     var styleValue = harnessElement.getAttribute("style")
-                    console.log("Found element:", harnessElement);
+                    console.log("Found harness element:" + harnessElement.outerHTML);
                     console.log("harness element: " + styleValue)
                     var valuesArray = styleValue.split(/\s+/);
                     function getIndex(index, name) {
@@ -624,9 +643,6 @@ var BookingManager = function(AppMan) {
                         if (valuesArray[index + 5] === "z-index:") {
                             valuesArray[index + 4] = "0%;"
                         }
-                        if (valuesArray[index + 2] === "40%") {
-                            valuesArray[index + 4] = "0%;"
-                        }
                     })
                     setAttrValue("z-index:", (index)=> {
                         if (element.textContent === "Booked") {
@@ -647,13 +663,20 @@ var BookingManager = function(AppMan) {
                             valuesArray.push("#FFFFFF;")
                         }
                     })
+                    setAttrValue("width:",
+                     (index)=> {
+                        valuesArray[insetindex + 1] = "100%;"
+                    },
+                     (index, name)=> {
+                        valuesArray.push(name)
+                        valuesArray.push("100%;")
+                    })
                     var valueStr = valuesArray.toString().replace(/,/g, " ")
                     console.log("new harness element: [" + valueStr + "]")
                     harnessElement.setAttribute("style", valueStr)
                 } else {
                     console.log("Element not found.");
                 }
-            }
         })
         removeBooked()
     }
