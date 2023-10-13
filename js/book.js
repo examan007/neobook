@@ -330,6 +330,28 @@ var BookingManager = function(AppMan) {
     var LastData = null
     var MyData = null
     var UpdateTimer = null
+    class EmailJSONStore {
+      constructor() {
+        this.data = [] // Initialize an empty object to store the JSON data.
+      }
+      // Method to set a JSON object with a specified email as the key.
+      set(email, jsonData) {
+        this.data[email] = jsonData;
+      }
+      // Method to get a JSON object by email.
+      get(email) {
+        if (this.data.hasOwnProperty(email)) {
+          return this.data[email];
+        } else {
+          return null; // Return null if the email is not found in the store.
+        }
+      }
+      length() {
+        return this.data.length
+      }
+    }
+    const emailStore = new EmailJSONStore();
+
     function startCalendar(identifier, setCalendar, indata) {
             const calendarEl = document.getElementById(identifier)
             const data = ()=> {
@@ -537,14 +559,33 @@ var BookingManager = function(AppMan) {
       Calendar.batchRendering(() => {
         if (LastData != null) {
             LastData.events.forEach((newevent) => {
-              console.log(JSON.stringify(newevent))
+              console.log("createevent: " + JSON.stringify(newevent))
               Calendar.addEvent(newevent);
             })
         }
-        if (MyData != null) {
+        if (MyData) {
             MyData.events.forEach((newevent) => {
-              console.log(JSON.stringify(newevent))
-              Calendar.addEvent(newevent);
+                try {
+                    if (newevent.customdata.phone.length > 0) {
+                        emailStore.set(newevent.customdata.email, newevent.customdata)
+                    }
+                } catch (e) {
+                    console.log("createevent: reader" + e.toString())
+                }
+            })
+            console.log("createevent: store count: " + emailStore.length())
+            MyData.events.forEach((newevent) => {
+              try {
+                  const customdata = emailStore.get(newevent.customdata.email)
+                  if (customdata) {
+                    newevent.customdata = customdata
+                    newevent.customdata.duration = newevent.duration
+                  }
+              } catch (e) {
+                console.log("createevent: " + e.toString())
+              }
+              console.log("createevent: " + JSON.stringify(newevent))
+              Calendar.addEvent(newevent)
             })
         }
         function getFilter() {
