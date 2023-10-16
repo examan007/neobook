@@ -402,8 +402,11 @@ var BookingManager = function(AppMan) {
                     if (eventDate < currentDate) {
                         return [ 'hiddenevent']
                     } else
-                    if (arg.event.title === "Booked") {
+                    if (arg.event.title.indexOf("Booked") >= 0) {
                         return [ 'booked' ]
+                    } else
+                    if (arg.event.title === "Hidden") {
+                        return [ 'hidden' ]
                     } else
                     if (arg.view.type === 'timeGridDay') {
                         return [ 'appointment', 'confirmed' ]
@@ -641,7 +644,7 @@ var BookingManager = function(AppMan) {
         const elements = document.querySelectorAll(".fc-event-title")
         console.log("hide: ")
         elements.forEach((element)=> {
-            if (element.textContent === "Booked") {
+            if (element.textContent.indexOf("Booked") >= 0) {
                 const harnessElement = findParentWithClass(element, "fc-daygrid-event-harness")
                 if (harnessElement) {
                     console.log("hide: " + element.outerHTML + " height: " + $(element).height())
@@ -672,7 +675,7 @@ var BookingManager = function(AppMan) {
                     return false
                 }
             }
-            if (element.textContent === "Booked") {
+            if (element.textContent.indexOf("Booked") >= 0) {
                     element.setAttribute("style",
                      "background-color: rgba(255, 255, 255, 0); color: rgba(255, 255, 255, 0);")
             }
@@ -706,7 +709,10 @@ var BookingManager = function(AppMan) {
                         }
                     })
                     setAttrValue("z-index:", (index)=> {
-                        if (element.textContent === "Booked") {
+                        if (element.textContent.indexOf("Booked") >= 0) {
+                            valuesArray[index + 1] = "50;"
+                        } else
+                        if (element.textContent === "Hidden") {
                             valuesArray[index + 1] = "50;"
                         } else {
                             valuesArray[index + 1] = "100;"
