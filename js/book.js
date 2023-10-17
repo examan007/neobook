@@ -332,7 +332,7 @@ var BookingManager = function(AppMan) {
     var UpdateTimer = null
     class EmailJSONStore {
       constructor() {
-        this.data = [] // Initialize an empty object to store the JSON data.
+        this.data = {} // Initialize an empty object to store the JSON data.
       }
       // Method to set a JSON object with a specified email as the key.
       set(email, jsonData) {
@@ -347,7 +347,7 @@ var BookingManager = function(AppMan) {
         }
       }
       length() {
-        return this.data.length
+        return Object.keys(this.data).length
       }
     }
     const emailStore = new EmailJSONStore();
@@ -427,6 +427,7 @@ var BookingManager = function(AppMan) {
                         })
                     }
                  } else {
+                    console.log("createevent: " + JSON.stringify(info.event))
                     popupRequest({
                       operation: 'changeappointmentrequest',
                       datetime: info.event.start,
@@ -568,24 +569,41 @@ var BookingManager = function(AppMan) {
         }
         if (MyData) {
             MyData.events.forEach((newevent) => {
-                try {
+               try {
                     if (newevent.customdata.phone.length > 0) {
+                       console.log("duration: " + JSON.stringify(newevent))
                         emailStore.set(newevent.customdata.email, newevent.customdata)
                     }
                 } catch (e) {
-                    console.log("createevent: reader" + e.toString())
+                    console.log("duration: reader" + e.toString())
                 }
             })
-            console.log("createevent: store count: " + emailStore.length())
+            console.log("duration: store count: " + emailStore.length())
             MyData.events.forEach((newevent) => {
               try {
                   const customdata = emailStore.get(newevent.customdata.email)
                   if (customdata) {
-                    newevent.customdata = customdata
-                    newevent.customdata.duration = newevent.duration
+                    newevent.customdata = { ...customdata }
                   }
               } catch (e) {
-                console.log("createevent: " + e.toString())
+                console.log("duration: " + e.toString())
+              }
+              try {
+                function getDuration() {
+                  const start = moment(newevent.start)
+                  const end = moment(newevent.end)
+                  return Number(end.diff(start, 'minutes'))
+                }
+                if (typeof(newevent.customdata) === 'undefined') {
+                    newevent.customdata = {
+                        duration: getDuration()
+                    }
+                } else {
+                    newevent.customdata.duration = getDuration()
+                }
+                console.log("duration: " + JSON.stringify(newevent))
+              } catch (e) {
+                console.log("duration: " + e.toString())
               }
               console.log("createevent: " + JSON.stringify(newevent))
               Calendar.addEvent(newevent)
