@@ -624,7 +624,8 @@ var BookingManager = function(AppMan) {
             if (filter.classname.length === 0) {
                 return false
             } else
-            if (filter.classname === "All") {
+            if (filter.classname.indexOf("All") >= 0 &&
+             name.indexOf("Laser Treatment") >= 0) {
                 return true
             } else
             if (filter.classname === name) {
