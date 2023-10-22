@@ -215,26 +215,53 @@ var BookingManager = function(AppMan) {
             Completion.clearLastClick()
         }
         Completion.getLastClickEvent( function (event) {
-            console.log("Completion: " + JSON.stringify(message))
+            console.log("Create: " + JSON.stringify(message))
           try {
               message.xpos = event.clientX
               message.ypos = event.clientY
-              console.log("Create: ypos = " + event.clientY )
+              const eventStartTime = moment(message.datetime)
+              function getPositions() {
+                  const element = document.querySelectorAll(".availability")[0]
+                  try {
+                      if(element) {
+                         return {
+                            start: element.getBoundingClientRect().top + window.scrollY,
+                            end: element.getBoundingClientRect().bottom + window.scrollY
+                         }
+                      }
+                  } catch (e){
+                      console.log("Create: " + e.toString())
+                  }
+                  return {
+                    start: 0,
+                    end: 0
+                  }
+              }
               const minutesToAddF = () => {
-                const mins = (((event.clientY - 106) / (460 - 106)) * 8 * 60)
-                return (((mins / 30) | 0) * 30) // - 30
+                try {
+                  const ypos = message.ypos
+                  const eventEndTime = moment(message.endtime)
+                  const startpos = getPositions().start
+                  const endpos = getPositions().end
+                  const totalslots = ((eventEndTime - eventStartTime) / 1000 / 60) / 30 | 0
+                  const slots = totalslots * (ypos - startpos) / (endpos - startpos) | 0
+                  console.log("Create: ypos = " + ypos + " starty = " + startpos + " slots = " + slots)
+                  return slots * 30
+                } catch (e) {
+                    console.log("Create: " + e.toString())
+                }
+                return 0
               }
               console.log("datetime=[" + message.datetime + "]")
-              const minutesToAdd = minutesToAddF()
-              const eventStartTime = moment(message.datetime)
-              eventStartTime.set({ hour: 9, minute: 0, second: 0 });
-              eventStartTime.add(minutesToAdd, 'minutes')
-              message.datetime = eventStartTime.toISOString()
-              console.log("minutesToAdd=" + minutesToAdd + " startdate=" + message.datetime)
+              if (typeof(message.endtime) !== 'undefined') {
+                  const minutesToAdd = minutesToAddF()
+                  eventStartTime.add(minutesToAdd, 'minutes')
+                  message.datetime = eventStartTime.toISOString()
+              }
               console.log("href=" + window.location.href)
               window.parent.postMessage(JSON.stringify(message), "*");
           } catch (e) {
-            console.log(e.toString())
+            console.log("Create: " + e.toString())
           }
         })
     }
@@ -423,6 +450,7 @@ var BookingManager = function(AppMan) {
                         popupRequest({
                           operation: 'showappointmentrequest',
                           datetime: info.event.start,
+                          endtime: info.event.end,
                           usermessage: info.event.title
                         })
                     }
