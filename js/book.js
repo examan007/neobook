@@ -3,20 +3,12 @@ var BookingManager = function(AppMan) {
     const console = {
         log: function(msg) {}
     }
+    var AdminFlag = false
     function isAdminUser() {
-        try {
-            if (MyData != null
-                &&
-                LastData != null
-                &&
-                MyData.events.length == LastData.events.length
-                ) {
-                return true
-            }
-        } catch (e) {
-            console.log("Is admin: " + e.toSting())
-        }
-        return false
+        return AdminFlag
+    }
+    function setAdminFlag(flag) {
+        AdminFlag = flag
     }
     function getParameters() {
         const params = window.location.href.split("?")[1]
@@ -217,6 +209,7 @@ var BookingManager = function(AppMan) {
         Completion.getLastClickEvent( function (event) {
             console.log("Create: " + JSON.stringify(message))
           try {
+              message.adminflag = isAdminUser()
               message.xpos = event.clientX
               message.ypos = event.clientY
               const eventStartTime = moment(message.datetime)
@@ -573,6 +566,7 @@ var BookingManager = function(AppMan) {
             if (data.authentication === true) {
                 console.log("auth: true")
                 MyData = data
+                setAdminFlag(data.adminflag)
             } else {
                 LastData = data
             }
