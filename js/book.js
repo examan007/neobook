@@ -442,6 +442,7 @@ var BookingManager = function(AppMan) {
                 }
                 return [...getClasses(), ...getAvailability()]
             },
+            hiddenDays: [ 0 ],
              eventClick: function(info) {
                if (info.view.type === 'timeGridDay') {
                  if (info.event.extendedProps.customtype === "availability") {
