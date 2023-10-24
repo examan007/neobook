@@ -606,7 +606,7 @@ var BookingManager = function(AppMan) {
               try {
                   const customdata = emailStore.get(newevent.customdata.email)
                   if (customdata) {
-                    newevent.customdata = { ...customdata }
+                    //newevent.customdata = { ...customdata }
                   }
               } catch (e) {
                 console.log("duration: " + e.toString())
