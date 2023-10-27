@@ -482,7 +482,7 @@ var BookingManager = function(AppMan) {
                       popupRequest({
                           operation: 'showappointmentrequest',
                           datetime: info.dateStr,
-                          usermessage: "",
+                          usermessage: FilterState.current.classname
                       }, true)
                   }
               }
